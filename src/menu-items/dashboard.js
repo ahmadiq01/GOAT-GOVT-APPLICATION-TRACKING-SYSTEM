@@ -115,15 +115,6 @@ const menuItems = [
     icon: icons.IconAsset,
     breadcrumbs: false,
     roles: ['Admin', 'SuperAdmin'] // Both roles can manage assets
-  },
-  {
-    id: 'esim-price-scrapper',
-    title: 'Esim Price Scrapper',
-    type: 'item',
-    url: '/esim-price-scrapper',
-    icon: icons.IconFileText,
-    breadcrumbs: false,
-    roles: ['Admin', 'SuperAdmin'] // Both roles can access esim price scrapper
   }
 ];
 

@@ -1,56 +1,31 @@
-import { useEffect, useState } from 'react';
+import React from 'react';
 
-// material-ui
-import Grid from '@mui/material/Grid2';
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
 
-// project imports
-import EarningCard from './EarningCard';
-import TotalOrderLineChartCard from './TotalOrderLineChartCard';
-import TotalGrowthBarChart from './TotalGrowthBarChart';
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
 
-import { gridSpacing } from 'store/constant';
+  componentDidCatch(error, errorInfo) {
+    console.error("Logged error:", error, errorInfo);
+  }
 
-// assets
-import StorefrontTwoToneIcon from '@mui/icons-material/StorefrontTwoTone';
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: 20, color: 'red' }}>
+          <h2>Something went wrong!</h2>
+          <pre>{this.state.error?.toString()}</pre>
+        </div>
+      );
+    }
 
-// ==============================|| DEFAULT DASHBOARD ||============================== //
-
-export default function Dashboard() {
-  const [isLoading, setLoading] = useState(true);
-
-  useEffect(() => {
-    setLoading(false);
-  }, []);
-
-  return (
-    <Grid container spacing={gridSpacing}>
-      <Grid size={12}>
-        <Grid container spacing={gridSpacing}>
-          <Grid
-            item
-            xs={12} sm={6} md={4} lg={4} // Ensure they take up space on smaller screens as well
-            style={{ flex: 1 }}
-          >
-            <EarningCard isLoading={isLoading} />
-          </Grid>
-          <Grid
-            item
-            xs={12} sm={6} md={4} lg={4} // Same as EarningCard for consistency
-            style={{ flex: 1 }}
-          >
-            <TotalOrderLineChartCard isLoading={isLoading} />
-          </Grid>
-          {/* Use Grid to take up the rest of the space and make cards fill the row */}
-          <Grid item xs />
-        </Grid>
-      </Grid>
-      <Grid size={12}>
-        <Grid container spacing={gridSpacing}>
-          <Grid item xs={12} md={8} style={{ flex: 1 }}>
-            <TotalGrowthBarChart isLoading={isLoading} />
-          </Grid>
-        </Grid>
-      </Grid>
-    </Grid>
-  );
+    return this.props.children;
+  }
 }
+
+export default ErrorBoundary;

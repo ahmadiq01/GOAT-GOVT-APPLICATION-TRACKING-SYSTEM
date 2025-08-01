@@ -10,7 +10,6 @@ import ProtectedRoute from './ProtectedRoute.jsx';
 import NotificationsManagement from '../views/notifications/notifications';
 import AdminManagement from '../views/admin/admin';
 import OrderLogs from '../views/orderlogs/orderlogs.jsx';
-import EsimPriceScrapper from '../views/esim-price-scrapper.jsx';
 
 // Dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -63,10 +62,6 @@ const MainRoutes = {
     {
       path: '/packages-management',
       element: <ProtectedRoute><PackagesManagement /></ProtectedRoute>
-    },
-    {
-      path: '/esim-price-scrapper',
-      element: <ProtectedRoute><EsimPriceScrapper /></ProtectedRoute>
     },
     {
       path: 'dashboard',
