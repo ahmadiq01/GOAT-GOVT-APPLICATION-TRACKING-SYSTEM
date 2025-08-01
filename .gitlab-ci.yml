@@ -1,0 +1,33 @@
+stages:
+  - build
+  - deploy
+
+cache:
+  paths:
+    - node_modules/
+
+build:
+  stage: build
+  image: node:20
+  script:
+    - yarn install --frozen-lockfile || npm install
+    - yarn build || npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
+
+deploy:
+  stage: deploy
+  image: alpine:latest
+  only:
+    - staging
+  before_script:
+    - apk add --no-cache openssh
+    - mkdir -p ~/.ssh
+    - echo "$DEPLOY_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - ssh-keyscan $SERVER_IP >> ~/.ssh/known_hosts
+  script:
+    - scp -r dist/. $SERVER_USER@$SERVER_IP:$TARGET_DIR
+    - ssh $SERVER_USER@$SERVER_IP "sudo systemctl restart nginx" 

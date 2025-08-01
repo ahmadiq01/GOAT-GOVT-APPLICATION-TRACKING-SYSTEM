@@ -1,0 +1,167 @@
+// assets
+import { 
+  IconDashboard, 
+  IconUsers, 
+  IconPackage, 
+  IconShoppingCart, 
+  IconBell, 
+  IconFileText, 
+  IconAsset
+} from '@tabler/icons-react';
+
+// constant
+const icons = { 
+  IconDashboard,
+  IconUsers,
+  IconPackage,
+  IconShoppingCart,
+  IconBell,
+  IconFileText,
+  IconAsset
+};
+
+// Function to get user role from localStorage
+const getUserRole = () => {
+  try {
+    const userRole = localStorage.getItem('userRole');
+    return userRole ? JSON.parse(userRole) : null;
+  } catch (error) {
+    console.error('Error parsing user role:', error);
+    return null;
+  }
+};
+
+// Function to get user data from localStorage
+const getUserData = () => {
+  try {
+    const userData = localStorage.getItem('userData');
+    return userData ? JSON.parse(userData) : null;
+  } catch (error) {
+    console.error('Error parsing user data:', error);
+    return null;
+  }
+};
+
+// Define menu items with role permissions
+const menuItems = [
+  {
+    id: 'default',
+    title: 'Dashboard',
+    type: 'item',
+    url: '/dashboard',
+    icon: icons.IconDashboard,
+    breadcrumbs: false,
+    roles: ['Admin', 'SuperAdmin'] // Both roles can access dashboard
+  },
+  {
+    id: 'user',
+    title: 'App Users',
+    type: 'item',
+    url: '/users',
+    icon: icons.IconUsers,
+    breadcrumbs: false,
+    roles: ['Admin', 'SuperAdmin'] // Both roles can manage app users
+  },
+  {
+    id: 'packages',
+    title: 'View Packages',
+    type: 'item',
+    url: '/ViewPackages',
+    icon: icons.IconPackage,
+    breadcrumbs: false,
+    roles: ['Admin', 'SuperAdmin'] // Both roles can manage packages
+  },
+  {
+    id: 'packages management',
+    title: 'Packages Management',
+    type: 'item',
+    url: '/packages-management',
+    icon: icons.IconFileText,
+    breadcrumbs: false,
+    roles: ['Admin', 'SuperAdmin'] // Both roles can manage order logs
+  },
+  {
+    id: 'orders',
+    title: 'Orders',
+    type: 'item',
+    url: '/orders',
+    icon: icons.IconShoppingCart,
+    breadcrumbs: false,
+    roles: ['Admin', 'SuperAdmin'] // Both roles can manage orders
+  },
+  {
+    id: 'admin',
+    title: 'Admin Users',
+    type: 'item',
+    url: '/admin',
+    icon: icons.IconUsers,
+    breadcrumbs: false,
+    roles: ['SuperAdmin'] // Only SuperAdmin can manage admin users
+  },
+  {
+    id: 'orderlogs',
+    title: 'Order Logs',
+    type: 'item',
+    url: '/order-logs',
+    icon: icons.IconFileText,
+    breadcrumbs: false,
+    roles: ['Admin', 'SuperAdmin'] // Both roles can manage order logs
+  },
+   {
+    id: 'assets',
+    title: 'Assets',
+    type: 'item',
+    url: '/assets',
+    icon: icons.IconAsset,
+    breadcrumbs: false,
+    roles: ['Admin', 'SuperAdmin'] // Both roles can manage assets
+  },
+  {
+    id: 'esim-price-scrapper',
+    title: 'Esim Price Scrapper',
+    type: 'item',
+    url: '/esim-price-scrapper',
+    icon: icons.IconFileText,
+    breadcrumbs: false,
+    roles: ['Admin', 'SuperAdmin'] // Both roles can access esim price scrapper
+  }
+];
+
+// Function to filter menu items based on user role
+const getFilteredMenuItems = () => {
+  const userRole = getUserRole();
+  const userData = getUserData();
+  
+  if (!userRole || !userData) {
+    return []; // Return empty array if no role found
+  }
+  
+  const currentUserRole = userRole.roleName;
+  
+  // Filter menu items based on user role
+  const filteredItems = menuItems.filter(item => 
+    item.roles.includes(currentUserRole)
+  );
+  
+  return filteredItems;
+};
+
+// ==============================|| DASHBOARD MENU ITEMS ||============================== //
+
+const getDashboard = () => {
+  const filteredMenuItems = getFilteredMenuItems();
+  
+  return {
+    id: 'dashboard',
+    title: 'Admin Portal',
+    type: 'group',
+    children: filteredMenuItems
+  };
+};
+
+// Create the dashboard object
+const dashboard = getDashboard();
+
+// Export both the static object (for backward compatibility) and the function
+export default dashboard;
+export { getDashboard, getUserRole, getUserData };
