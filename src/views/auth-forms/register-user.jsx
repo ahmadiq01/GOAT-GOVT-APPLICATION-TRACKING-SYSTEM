@@ -15,112 +15,130 @@ import {
   Alert,
   Container,
   styled,
-  useTheme
+  useTheme,
+  Divider
 } from '@mui/material';
 import {
-  Person as PersonIcon,
+  AccountBalance as GovIcon,
   CloudUpload as CloudUploadIcon,
-  Check as CheckIcon,
-  Description as DescriptionIcon
+  Send as SendIcon,
+  Description as DescriptionIcon,
+  Warning as ComplaintIcon
 } from '@mui/icons-material';
 
-const applicationTypes = [
-  'Type A',
-  'Type B',
-  'Type C',
+const complaintTypes = [
+  'Public Service Issue',
+  'Infrastructure Problem',
+  'Administrative Complaint',
+  'Utility Services',
+  'Municipal Services',
+  'Traffic & Transportation',
+  'Environmental Issue',
   'Other',
 ];
 
-// Styled components for custom styling
-const StyledPaper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(6),
-  borderRadius: theme.spacing(3),
-  boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
-  border: `1px solid ${theme.palette.success.light}`,
+// Styled components for government styling with green theme
+const GovPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(5),
+  borderRadius: theme.spacing(1),
+  boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+  border: `2px solid #00ce5a`,
   position: 'relative',
-  overflow: 'hidden',
+  backgroundColor: '#fafafa',
   '&::before': {
     content: '""',
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: '4px',
-    background: `linear-gradient(90deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
+    height: '6px',
+    background: 'linear-gradient(90deg, #00ce5a, #00a047)',
   }
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const GovTextField = styled(TextField)(({ theme }) => ({
   '& .MuiOutlinedInput-root': {
-    borderRadius: theme.spacing(1.5),
-    backgroundColor: theme.palette.grey[50],
-    transition: 'all 0.3s ease',
-    '&:hover': {
-      backgroundColor: theme.palette.common.white,
+    borderRadius: theme.spacing(0.5),
+    backgroundColor: '#ffffff',
+    '& fieldset': {
+      borderColor: '#bdbdbd',
     },
-    '&.Mui-focused': {
-      backgroundColor: theme.palette.common.white,
-      '& fieldset': {
-        borderColor: theme.palette.success.main,
-        borderWidth: '2px',
-      }
+    '&:hover fieldset': {
+      borderColor: '#00ce5a',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: '#00ce5a',
+      borderWidth: '2px',
     }
-  }
-}));
-
-const StyledSelect = styled(Select)(({ theme }) => ({
-  borderRadius: theme.spacing(1.5),
-  backgroundColor: theme.palette.grey[50],
-  '&:hover': {
-    backgroundColor: theme.palette.common.white,
   },
-  '&.Mui-focused': {
-    backgroundColor: theme.palette.common.white,
+  '& .MuiInputLabel-root': {
+    fontWeight: 500,
   }
 }));
 
-const UploadBox = styled(Box)(({ theme }) => ({
-  border: `2px dashed ${theme.palette.success.light}`,
-  borderRadius: theme.spacing(1.5),
+const GovSelect = styled(Select)(({ theme }) => ({
+  borderRadius: theme.spacing(0.5),
+  backgroundColor: '#ffffff',
+  '& fieldset': {
+    borderColor: '#bdbdbd',
+  },
+  '&:hover fieldset': {
+    borderColor: '#00ce5a',
+  },
+  '&.Mui-focused fieldset': {
+    borderColor: '#00ce5a',
+    borderWidth: '2px',
+  }
+}));
+
+const UploadArea = styled(Box)(({ theme }) => ({
+  border: `2px dashed #00ce5a`,
+  borderRadius: theme.spacing(0.5),
   padding: theme.spacing(4),
   textAlign: 'center',
   cursor: 'pointer',
-  transition: 'all 0.3s ease',
-  backgroundColor: theme.palette.grey[50],
+  transition: 'all 0.2s ease',
+  backgroundColor: '#ffffff',
   '&:hover': {
-    borderColor: theme.palette.success.main,
-    backgroundColor: theme.palette.success[50],
+    borderColor: '#00a047',
+    backgroundColor: '#e8f8f0',
   }
 }));
 
-const GradientButton = styled(Button)(({ theme }) => ({
-  background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
-  borderRadius: theme.spacing(1.5),
+const GovButton = styled(Button)(({ theme }) => ({
+  background: 'linear-gradient(45deg, #00ce5a, #00a047)',
+  borderRadius: theme.spacing(0.5),
   padding: theme.spacing(1.5, 4),
-  fontSize: '1.1rem',
-  fontWeight: 'bold',
-  textTransform: 'none',
-  boxShadow: '0 8px 20px rgba(76, 175, 80, 0.3)',
-  transition: 'all 0.3s ease',
+  fontSize: '1rem',
+  fontWeight: 600,
+  textTransform: 'uppercase',
+  letterSpacing: '0.5px',
+  boxShadow: '0 4px 12px rgba(0, 206, 90, 0.3)',
   '&:hover': {
-    background: `linear-gradient(45deg, ${theme.palette.success.dark}, ${theme.palette.success[800]})`,
-    transform: 'translateY(-2px)',
-    boxShadow: '0 12px 24px rgba(76, 175, 80, 0.4)',
-  },
-  '&:active': {
-    transform: 'translateY(0)',
+    background: 'linear-gradient(45deg, #00a047, #008a3d)',
+    boxShadow: '0 6px 16px rgba(0, 206, 90, 0.4)',
   }
 }));
 
-export default function RegisterUser() {
+const HeaderBox = styled(Box)(({ theme }) => ({
+  background: '#013f1b',
+  color: 'white',
+  padding: theme.spacing(4),
+  borderRadius: theme.spacing(1),
+  marginBottom: theme.spacing(4),
+  textAlign: 'center',
+  boxShadow: '0 4px 12px rgba(1, 63, 27, 0.3)',
+}));
+
+export default function ComplaintRegistrationForm() {
   const theme = useTheme();
   const [name, setName] = useState('');
   const [cnic, setCnic] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
-  const [applicationType, setApplicationType] = useState('');
-  const [description, setDescription] = useState('');
+  const [complaintType, setComplaintType] = useState('');
+  const [complaintDetails, setComplaintDetails] = useState('');
   const [attachments, setAttachments] = useState([]);
 
   const handleFileChange = (e) => {
@@ -129,97 +147,152 @@ export default function RegisterUser() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log({ name, cnic, phone, email, address, applicationType, description, attachments });
+    console.log({ 
+      name, 
+      cnic, 
+      phone, 
+      email, 
+      address, 
+      complaintType, 
+      complaintDetails, 
+      attachments 
+    });
   };
 
   return (
     <Box sx={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #e8f5e8 0%, #ffffff 50%, #e8f5e8 100%)',
-      py: 6,
+      backgroundColor: '#f5f5f5',
+      py: 4,
       px: 2
     }}>
       <Container maxWidth="lg">
-        {/* Header */}
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
-          
-          <Typography variant="h3" component="h1" sx={{
-            fontWeight: 'bold',
-            color: 'grey.800',
-            mb: 2
-          }}>
-            Register Your Application
-          </Typography>
-          
-          <Typography variant="h6" sx={{
-            color: 'grey.600',
-            mb: 2
-          }}>
-            Please fill out all required information below
-          </Typography>
-          
-          <Box sx={{
-            width: 96,
-            height: 4,
-            background: `linear-gradient(90deg, ${theme.palette.success.light}, ${theme.palette.success.dark})`,
+        {/* Government Header */}
+        <HeaderBox>
+          <Avatar sx={{
+            width: 80,
+            height: 80,
+            bgcolor: 'rgba(255,255,255,0.2)',
             mx: 'auto',
-            borderRadius: 2
-          }} />
-        </Box>
+            mb: 2
+          }}>
+            <GovIcon sx={{ fontSize: 40, color: 'white' }} />
+          </Avatar>
+          
+          <Typography variant="h4" component="h1" sx={{
+            fontWeight: 700,
+            mb: 1,
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            color: 'white'
+          }}>
+            Government of Pakistan
+          </Typography>
+          
+          <Typography variant="h5" sx={{
+            fontWeight: 500,
+            mb: 2,
+            opacity: 0.9,
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            color: 'white'
+          }}>
+            Public Complaint Registration System
+          </Typography>
+          
+          <Typography variant="body1" sx={{
+            opacity: 0.8,
+            maxWidth: 600,
+            mx: 'auto',
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+            color: 'white'
+          }}>
+            Submit your complaint online for prompt resolution by relevant authorities
+          </Typography>
+        </HeaderBox>
 
         {/* Form Card */}
-        <StyledPaper elevation={0}>
+        <GovPaper elevation={2}>
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h5" sx={{
+              fontWeight: 600,
+              color: '#00ce5a',
+              mb: 1,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1
+            }}>
+              <ComplaintIcon />
+              Complaint Registration Form
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#666', mb: 2 }}>
+              Please fill all required fields marked with asterisk (*) accurately
+            </Typography>
+            <Divider sx={{ bgcolor: '#00ce5a', height: 2 }} />
+          </Box>
+
           <Box component="form" onSubmit={handleSubmit}>
-            <Grid container spacing={4}>
+            <Grid container spacing={3}>
+              {/* Personal Information Section */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 600,
+                  color: '#424242',
+                  mb: 2,
+                  pb: 1,
+                  borderBottom: '2px solid #e0e0e0'
+                }}>
+                  Personal Information
+                </Typography>
+              </Grid>
+
               {/* Name Field */}
               <Grid item xs={12} md={6}>
-                <StyledTextField
+                <GovTextField
                   fullWidth
-                  label="Full Name"
+                  label="Full Name *"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  placeholder="Enter your full name"
+                  placeholder="Enter your complete name as per CNIC"
                   variant="outlined"
                 />
               </Grid>
 
               {/* CNIC Field */}
               <Grid item xs={12} md={6}>
-                <StyledTextField
+                <GovTextField
                   fullWidth
-                  label="CNIC"
+                  label="CNIC Number *"
                   value={cnic}
                   onChange={(e) => setCnic(e.target.value)}
                   required
                   placeholder="00000-0000000-0"
                   variant="outlined"
+                  inputProps={{ maxLength: 15 }}
                 />
               </Grid>
 
               {/* Phone Field */}
               <Grid item xs={12} md={6}>
-                <StyledTextField
+                <GovTextField
                   fullWidth
-                  label="Phone Number"
+                  label="Mobile Number *"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
-                  placeholder="+92 300 0000000"
+                  placeholder="+92-300-0000000"
                   variant="outlined"
                 />
               </Grid>
 
               {/* Email Field */}
               <Grid item xs={12} md={6}>
-                <StyledTextField
+                <GovTextField
                   fullWidth
                   label="Email Address"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
                   placeholder="your.email@example.com"
                   variant="outlined"
                 />
@@ -227,91 +300,142 @@ export default function RegisterUser() {
 
               {/* Address Field */}
               <Grid item xs={12}>
-                <StyledTextField
+                <GovTextField
                   fullWidth
-                  label="Address"
+                  label="Complete Address *"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   required
-                  placeholder="Enter your complete address"
+                  placeholder="House/Flat No., Street, Area, City, Province"
                   variant="outlined"
+                  multiline
+                  rows={2}
                 />
               </Grid>
 
-              {/* Application Type */}
+              {/* Complaint Information Section */}
+              <Grid item xs={12} sx={{ mt: 3 }}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 600,
+                  color: '#424242',
+                  mb: 2,
+                  pb: 1,
+                  borderBottom: '2px solid #e0e0e0'
+                }}>
+                  Complaint Details
+                </Typography>
+              </Grid>
+
+              {/* Complaint Type */}
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth required>
-                  <InputLabel>Application Type</InputLabel>
-                  <StyledSelect
-                    value={applicationType}
-                    onChange={(e) => setApplicationType(e.target.value)}
-                    label="Application Type"
+                  <InputLabel sx={{ fontWeight: 500 }}>Complaint Category *</InputLabel>
+                  <GovSelect
+                    value={complaintType}
+                    onChange={(e) => setComplaintType(e.target.value)}
+                    label="Complaint Category *"
                   >
-                    {applicationTypes.map((type) => (
+                    {complaintTypes.map((type) => (
                       <MenuItem key={type} value={type}>
                         {type}
                       </MenuItem>
                     ))}
-                  </StyledSelect>
+                  </GovSelect>
                 </FormControl>
               </Grid>
 
-              {/* Description Field */}
+              <Grid item xs={12} md={6}>
+                <Box sx={{ 
+                  height: '100%', 
+                  display: 'flex', 
+                  alignItems: 'center',
+                  bgcolor: '#e8f8f0',
+                  p: 2,
+                  borderRadius: 1,
+                  border: '1px solid #b8e6c1'
+                }}>
+                  <Typography variant="body2" sx={{ color: '#00a047', fontWeight: 500 }}>
+                    Select the most appropriate category for faster processing
+                  </Typography>
+                </Box>
+              </Grid>
+
+              {/* Complaint Details */}
               <Grid item xs={12}>
-                <StyledTextField
+                <GovTextField
                   fullWidth
-                  label="Description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  label="Detailed Complaint Description *"
+                  value={complaintDetails}
+                  onChange={(e) => setComplaintDetails(e.target.value)}
                   required
-                  placeholder="Please provide a detailed description of your application..."
+                  placeholder="Please provide detailed information about your complaint including date, time, location, and any other relevant details..."
                   variant="outlined"
                   multiline
-                  rows={4}
+                  rows={6}
                 />
               </Grid>
 
               {/* File Upload */}
               <Grid item xs={12}>
-                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, color: 'grey.700' }}>
-                  Attachments
+                <Typography variant="subtitle1" sx={{ 
+                  mb: 2, 
+                  fontWeight: 600, 
+                  color: '#424242'
+                }}>
+                  Supporting Documents (Optional)
                 </Typography>
                 
                 <input
                   type="file"
                   multiple
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
                   onChange={handleFileChange}
                   style={{ display: 'none' }}
                   id="file-upload"
                 />
                 
                 <label htmlFor="file-upload">
-                  <UploadBox>
+                  <UploadArea>
                     <Avatar sx={{
-                      width: 64,
-                      height: 64,
-                      bgcolor: 'success.100',
-                      color: 'success.main',
+                      width: 56,
+                      height: 56,
+                      bgcolor: '#e8f8f0',
+                      color: '#00ce5a',
                       mx: 'auto',
                       mb: 2
                     }}>
-                      <CloudUploadIcon sx={{ fontSize: 32 }} />
+                      <CloudUploadIcon sx={{ fontSize: 28 }} />
                     </Avatar>
                     
-                    <Typography variant="h6" sx={{ mb: 1, color: 'grey.700' }}>
-                      Upload Attachments
+                    <Typography variant="h6" sx={{ mb: 1, color: '#424242' }}>
+                      Upload Supporting Documents
                     </Typography>
                     
-                    <Typography variant="body2" sx={{ color: 'grey.500' }}>
-                      Click to browse or drag and drop files here
+                    <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
+                      Click to select files or drag and drop here
                     </Typography>
-                  </UploadBox>
+                    
+                    <Typography variant="caption" sx={{ color: '#999' }}>
+                      Accepted formats: PDF, JPG, PNG, DOC, DOCX (Max 5MB each)
+                    </Typography>
+                  </UploadArea>
                 </label>
 
                 {attachments.length > 0 && (
-                  <Alert severity="success" sx={{ mt: 2, borderRadius: 2 }}>
-                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                      Selected files:
+                  <Alert 
+                    severity="info" 
+                    sx={{ 
+                      mt: 2, 
+                      borderRadius: 1,
+                      bgcolor: '#e8f8f0',
+                      border: '1px solid #b8e6c1',
+                      '& .MuiAlert-icon': {
+                        color: '#00ce5a'
+                      }
+                    }}
+                  >
+                    <Typography variant="subtitle2" sx={{ mb: 1, color: '#00a047' }}>
+                      Attached Documents ({attachments.length}):
                     </Typography>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                       {attachments.map((file, idx) => (
@@ -320,8 +444,15 @@ export default function RegisterUser() {
                           label={file.name}
                           icon={<DescriptionIcon />}
                           variant="outlined"
-                          color="success"
                           size="small"
+                          sx={{ 
+                            bgcolor: 'white',
+                            borderColor: '#00ce5a',
+                            color: '#00a047',
+                            '& .MuiChip-icon': {
+                              color: '#00ce5a'
+                            }
+                          }}
                         />
                       ))}
                     </Box>
@@ -329,29 +460,29 @@ export default function RegisterUser() {
                 )}
               </Grid>
 
-              {/* Submit Button */}
+              {/* Terms and Submit */}
               <Grid item xs={12}>
-                <Box sx={{ mt: 4 }}>
-                  <GradientButton
-                    type="submit"
-                    fullWidth
-                    size="large"
-                    startIcon={<CheckIcon />}
-                  >
-                    Register Application
-                  </GradientButton>
-                </Box>
+                <Alert severity="warning" sx={{ mb: 3, borderRadius: 1 }}>
+                  <Typography variant="body2">
+                    <strong>Important:</strong> Providing false information is a punishable offense. 
+                    Your complaint will be forwarded to the relevant department for investigation and resolution.
+                  </Typography>
+                </Alert>
+
+                <GovButton
+                  type="submit"
+                  fullWidth
+                  size="large"
+                  startIcon={<SendIcon />}
+                  sx={{ py: 2 }}
+                >
+                  Submit Complaint
+                </GovButton>
               </Grid>
             </Grid>
           </Box>
-        </StyledPaper>
+        </GovPaper>
 
-        {/* Footer */}
-        {/* <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Typography variant="body2" sx={{ color: 'grey.500' }}>
-            All fields marked with * are required
-          </Typography>
-        </Box> */}
       </Container>
     </Box>
   );
