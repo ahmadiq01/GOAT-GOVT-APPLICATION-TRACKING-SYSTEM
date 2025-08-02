@@ -1,4 +1,28 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Button,
+  Grid,
+  Avatar,
+  Chip,
+  Alert,
+  Container,
+  styled,
+  useTheme
+} from '@mui/material';
+import {
+  Person as PersonIcon,
+  CloudUpload as CloudUploadIcon,
+  Check as CheckIcon,
+  Description as DescriptionIcon
+} from '@mui/icons-material';
 
 const applicationTypes = [
   'Type A',
@@ -7,7 +31,89 @@ const applicationTypes = [
   'Other',
 ];
 
+// Styled components for custom styling
+const StyledPaper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(6),
+  borderRadius: theme.spacing(3),
+  boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+  border: `1px solid ${theme.palette.success.light}`,
+  position: 'relative',
+  overflow: 'hidden',
+  '&::before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '4px',
+    background: `linear-gradient(90deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
+  }
+}));
+
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: theme.spacing(1.5),
+    backgroundColor: theme.palette.grey[50],
+    transition: 'all 0.3s ease',
+    '&:hover': {
+      backgroundColor: theme.palette.common.white,
+    },
+    '&.Mui-focused': {
+      backgroundColor: theme.palette.common.white,
+      '& fieldset': {
+        borderColor: theme.palette.success.main,
+        borderWidth: '2px',
+      }
+    }
+  }
+}));
+
+const StyledSelect = styled(Select)(({ theme }) => ({
+  borderRadius: theme.spacing(1.5),
+  backgroundColor: theme.palette.grey[50],
+  '&:hover': {
+    backgroundColor: theme.palette.common.white,
+  },
+  '&.Mui-focused': {
+    backgroundColor: theme.palette.common.white,
+  }
+}));
+
+const UploadBox = styled(Box)(({ theme }) => ({
+  border: `2px dashed ${theme.palette.success.light}`,
+  borderRadius: theme.spacing(1.5),
+  padding: theme.spacing(4),
+  textAlign: 'center',
+  cursor: 'pointer',
+  transition: 'all 0.3s ease',
+  backgroundColor: theme.palette.grey[50],
+  '&:hover': {
+    borderColor: theme.palette.success.main,
+    backgroundColor: theme.palette.success[50],
+  }
+}));
+
+const GradientButton = styled(Button)(({ theme }) => ({
+  background: `linear-gradient(45deg, ${theme.palette.success.main}, ${theme.palette.success.dark})`,
+  borderRadius: theme.spacing(1.5),
+  padding: theme.spacing(1.5, 4),
+  fontSize: '1.1rem',
+  fontWeight: 'bold',
+  textTransform: 'none',
+  boxShadow: '0 8px 20px rgba(76, 175, 80, 0.3)',
+  transition: 'all 0.3s ease',
+  '&:hover': {
+    background: `linear-gradient(45deg, ${theme.palette.success.dark}, ${theme.palette.success[800]})`,
+    transform: 'translateY(-2px)',
+    boxShadow: '0 12px 24px rgba(76, 175, 80, 0.4)',
+  },
+  '&:active': {
+    transform: 'translateY(0)',
+  }
+}));
+
 export default function RegisterUser() {
+  const theme = useTheme();
   const [name, setName] = useState('');
   const [cnic, setCnic] = useState('');
   const [phone, setPhone] = useState('');
@@ -27,237 +133,226 @@ export default function RegisterUser() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-green-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
+    <Box sx={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #e8f5e8 0%, #ffffff 50%, #e8f5e8 100%)',
+      py: 6,
+      px: 2
+    }}>
+      <Container maxWidth="lg">
         {/* Header */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full mb-6 shadow-lg">
-            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">Registration Form</h1>
-          <p className="text-gray-600 text-lg">Please fill out all required information below</p>
-          <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-green-600 mx-auto mt-4 rounded-full"></div>
-        </div>
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
+          
+          <Typography variant="h3" component="h1" sx={{
+            fontWeight: 'bold',
+            color: 'grey.800',
+            mb: 2
+          }}>
+            Register Your Application
+          </Typography>
+          
+          <Typography variant="h6" sx={{
+            color: 'grey.600',
+            mb: 2
+          }}>
+            Please fill out all required information below
+          </Typography>
+          
+          <Box sx={{
+            width: 96,
+            height: 4,
+            background: `linear-gradient(90deg, ${theme.palette.success.light}, ${theme.palette.success.dark})`,
+            mx: 'auto',
+            borderRadius: 2
+          }} />
+        </Box>
 
         {/* Form Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-green-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-green-500 to-green-600 h-2"></div>
-          
-          <div className="p-8 md:p-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <StyledPaper elevation={0}>
+          <Box component="form" onSubmit={handleSubmit}>
+            <Grid container spacing={4}>
               {/* Name Field */}
-              <div className="group">
-                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Full Name *
-                </label>
-                <div className="relative">
-                  <input
-                    id="name"
-                    type="text"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-0 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-                    placeholder="Enter your full name"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-green-400 to-green-600 transform scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
-                </div>
-              </div>
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="Full Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                  placeholder="Enter your full name"
+                  variant="outlined"
+                />
+              </Grid>
 
               {/* CNIC Field */}
-              <div className="group">
-                <label htmlFor="cnic" className="block text-sm font-semibold text-gray-700 mb-2">
-                  CNIC *
-                </label>
-                <div className="relative">
-                  <input
-                    id="cnic"
-                    type="text"
-                    value={cnic}
-                    onChange={e => setCnic(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-0 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-                    placeholder="00000-0000000-0"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-green-400 to-green-600 transform scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
-                </div>
-              </div>
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="CNIC"
+                  value={cnic}
+                  onChange={(e) => setCnic(e.target.value)}
+                  required
+                  placeholder="00000-0000000-0"
+                  variant="outlined"
+                />
+              </Grid>
 
               {/* Phone Field */}
-              <div className="group">
-                <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Phone Number *
-                </label>
-                <div className="relative">
-                  <input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={e => setPhone(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-0 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-                    placeholder="+92 300 0000000"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-green-400 to-green-600 transform scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
-                </div>
-              </div>
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="Phone Number"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  required
+                  placeholder="+92 300 0000000"
+                  variant="outlined"
+                />
+              </Grid>
 
               {/* Email Field */}
-              <div className="group">
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email Address *
-                </label>
-                <div className="relative">
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-0 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-                    placeholder="your.email@example.com"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-green-400 to-green-600 transform scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
-                </div>
-              </div>
+              <Grid item xs={12} md={6}>
+                <StyledTextField
+                  fullWidth
+                  label="Email Address"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="your.email@example.com"
+                  variant="outlined"
+                />
+              </Grid>
 
-              {/* Address Field - Full Width */}
-              <div className="md:col-span-2 group">
-                <label htmlFor="address" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Address *
-                </label>
-                <div className="relative">
-                  <input
-                    id="address"
-                    type="text"
-                    value={address}
-                    onChange={e => setAddress(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-0 transition-all duration-300 outline-none bg-gray-50 focus:bg-white"
-                    placeholder="Enter your complete address"
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-green-400 to-green-600 transform scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
-                </div>
-              </div>
+              {/* Address Field */}
+              <Grid item xs={12}>
+                <StyledTextField
+                  fullWidth
+                  label="Address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
+                  placeholder="Enter your complete address"
+                  variant="outlined"
+                />
+              </Grid>
 
               {/* Application Type */}
-              <div className="group">
-                <label htmlFor="application-type" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Application Type *
-                </label>
-                <div className="relative">
-                  <select
-                    id="application-type"
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth required>
+                  <InputLabel>Application Type</InputLabel>
+                  <StyledSelect
                     value={applicationType}
-                    onChange={e => setApplicationType(e.target.value)}
-                    required
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-0 transition-all duration-300 outline-none bg-gray-50 focus:bg-white appearance-none cursor-pointer"
+                    onChange={(e) => setApplicationType(e.target.value)}
+                    label="Application Type"
                   >
-                    <option value="">Select application type</option>
-                    {applicationTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
+                    {applicationTypes.map((type) => (
+                      <MenuItem key={type} value={type}>
+                        {type}
+                      </MenuItem>
                     ))}
-                  </select>
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-green-400 to-green-600 transform scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
-                </div>
-              </div>
+                  </StyledSelect>
+                </FormControl>
+              </Grid>
 
               {/* Description Field */}
-              <div className="md:col-span-2 group">
-                <label htmlFor="description" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Description *
-                </label>
-                <div className="relative">
-                  <textarea
-                    id="description"
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    required
-                    rows={4}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:ring-0 transition-all duration-300 outline-none bg-gray-50 focus:bg-white resize-none"
-                    placeholder="Please provide a detailed description of your application..."
-                  />
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-green-400 to-green-600 transform scale-x-0 group-focus-within:scale-x-100 transition-transform duration-300"></div>
-                </div>
-              </div>
+              <Grid item xs={12}>
+                <StyledTextField
+                  fullWidth
+                  label="Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                  placeholder="Please provide a detailed description of your application..."
+                  variant="outlined"
+                  multiline
+                  rows={4}
+                />
+              </Grid>
 
               {/* File Upload */}
-              <div className="md:col-span-2">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, color: 'grey.700' }}>
                   Attachments
-                </label>
-                <div className="relative">
-                  <label htmlFor="file-upload" className="group cursor-pointer">
-                    <div className="border-2 border-dashed border-green-300 rounded-xl p-8 text-center hover:border-green-500 hover:bg-green-50 transition-all duration-300">
-                      <div className="space-y-4">
-                        <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition-colors duration-300">
-                          <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                          </svg>
-                        </div>
-                        <div>
-                          <p className="text-lg font-medium text-gray-700">Upload Attachments</p>
-                          <p className="text-sm text-gray-500">Click to browse or drag and drop files here</p>
-                        </div>
-                      </div>
-                    </div>
-                    <input
-                      id="file-upload"
-                      type="file"
-                      multiple
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </label>
-                </div>
+                </Typography>
                 
-                {attachments.length > 0 && (
-                  <div className="mt-4 p-4 bg-green-50 rounded-xl border border-green-200">
-                    <p className="text-sm font-semibold text-green-800 mb-2">Selected files:</p>
-                    <div className="space-y-2">
-                      {attachments.map((file, idx) => (
-                        <div key={idx} className="flex items-center space-x-2 text-sm text-green-700">
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <span>{file.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileChange}
+                  style={{ display: 'none' }}
+                  id="file-upload"
+                />
+                
+                <label htmlFor="file-upload">
+                  <UploadBox>
+                    <Avatar sx={{
+                      width: 64,
+                      height: 64,
+                      bgcolor: 'success.100',
+                      color: 'success.main',
+                      mx: 'auto',
+                      mb: 2
+                    }}>
+                      <CloudUploadIcon sx={{ fontSize: 32 }} />
+                    </Avatar>
+                    
+                    <Typography variant="h6" sx={{ mb: 1, color: 'grey.700' }}>
+                      Upload Attachments
+                    </Typography>
+                    
+                    <Typography variant="body2" sx={{ color: 'grey.500' }}>
+                      Click to browse or drag and drop files here
+                    </Typography>
+                  </UploadBox>
+                </label>
 
-            {/* Submit Button */}
-            <div className="mt-12">
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white font-bold py-4 px-8 rounded-xl hover:from-green-600 hover:to-green-700 transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-green-300"
-              >
-                <span className="flex items-center justify-center space-x-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Register Apsssplication</span>
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
+                {attachments.length > 0 && (
+                  <Alert severity="success" sx={{ mt: 2, borderRadius: 2 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                      Selected files:
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                      {attachments.map((file, idx) => (
+                        <Chip
+                          key={idx}
+                          label={file.name}
+                          icon={<DescriptionIcon />}
+                          variant="outlined"
+                          color="success"
+                          size="small"
+                        />
+                      ))}
+                    </Box>
+                  </Alert>
+                )}
+              </Grid>
+
+              {/* Submit Button */}
+              <Grid item xs={12}>
+                <Box sx={{ mt: 4 }}>
+                  <GradientButton
+                    type="submit"
+                    fullWidth
+                    size="large"
+                    startIcon={<CheckIcon />}
+                  >
+                    Register Application
+                  </GradientButton>
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
+        </StyledPaper>
 
         {/* Footer */}
-        <div className="text-center mt-8 text-gray-500">
-          <p className="text-sm">All fields marked with * are required</p>
-        </div>
-      </div>
-    </div>
+        {/* <Box sx={{ textAlign: 'center', mt: 4 }}>
+          <Typography variant="body2" sx={{ color: 'grey.500' }}>
+            All fields marked with * are required
+          </Typography>
+        </Box> */}
+      </Container>
+    </Box>
   );
 }
