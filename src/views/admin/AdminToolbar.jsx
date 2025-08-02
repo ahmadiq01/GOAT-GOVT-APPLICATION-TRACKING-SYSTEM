@@ -46,7 +46,7 @@ const AdminToolbar = ({
         type="primary" 
         icon={<PlusOutlined />}
         onClick={() => setIsCreateModalVisible(true)}
-        style={{ backgroundColor: '#76cbba', borderColor: '#76cbba' }}
+        style={{ backgroundColor: '#013F1B', borderColor: '#013F1B' }}
       >
         Create Admin
       </Button>

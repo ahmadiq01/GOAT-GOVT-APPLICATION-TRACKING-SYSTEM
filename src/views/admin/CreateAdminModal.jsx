@@ -139,7 +139,7 @@ const CreateAdminModal = ({ visible, loading, onCancel, onFinish }) => {
               type="primary" 
               htmlType="submit" 
               loading={loading}
-              style={{ backgroundColor: '#76cbba', borderColor: '#76cbba' }}
+              style={{ backgroundColor: '#013F1B', borderColor: '#013F1B' }}
             >
               Create Admin
             </Button>

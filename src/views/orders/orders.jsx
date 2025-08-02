@@ -238,7 +238,7 @@ const OrdersManagement = () => {
       render: (status) => {
         let color, icon, label;
         if (status === 'active' || status === 'completed') {
-          color = '#76cbba';
+          color = '#013F1B';
           icon = <CheckCircleOutlined />;
           label = 'Active';
         } else {
@@ -269,7 +269,7 @@ const OrdersManagement = () => {
           <Button 
             type="primary"
             onClick={() => handleViewOrderDetails(record)}
-            style={{ backgroundColor: '#76cbba', borderColor: '#76cbba' }}
+            style={{ backgroundColor: '#013F1B', borderColor: '#013F1B' }}
           >
             Details
           </Button>
@@ -294,7 +294,7 @@ const OrdersManagement = () => {
   return (
     <div style={{ padding: '24px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.09)' }}>
-        <Title level={2} style={{ marginBottom: '24px', color: '#76cbba' }}>
+        <Title level={2} style={{ marginBottom: '24px', color: '#013F1B' }}>
           <DollarOutlined style={{ marginRight: '12px' }} />
           eSIM Orders Management
         </Title>
@@ -309,7 +309,7 @@ const OrdersManagement = () => {
                 value={formattedTotalRevenue} 
                 prefix="$" 
                 precision={2}
-                valueStyle={{ color: '#76cbba' }}
+                valueStyle={{ color: '#013F1B' }}
               />
             </Card>
             <Card style={{ flex: 1 }}>
@@ -357,7 +357,7 @@ const OrdersManagement = () => {
               <Option value="">All Orders</Option>
               <Option value="active">
                 <Space>
-                  <CheckCircleOutlined style={{ color: '#76cbba' }} />
+                  <CheckCircleOutlined style={{ color: '#013F1B' }} />
                   Active
                 </Space>
               </Option>
@@ -428,7 +428,7 @@ const OrdersManagement = () => {
               <strong>Status:</strong> 
               <Tag 
                 color={
-                  selectedOrder.status === 'active' || selectedOrder.status === 'completed' ? '#76cbba' : '#faad14'
+                  selectedOrder.status === 'active' || selectedOrder.status === 'completed' ? '#013F1B' : '#faad14'
                 } 
                 style={{ margin: '0 8px', padding: '2px 8px' }}
               >
@@ -461,7 +461,7 @@ const OrdersManagement = () => {
         }
         .ant-table-thead > tr > th {
           background-color: #f0f5ff;
-          color: #76cbba;
+          color: #013F1B;
           font-weight: 600;
         }
       `}</style>

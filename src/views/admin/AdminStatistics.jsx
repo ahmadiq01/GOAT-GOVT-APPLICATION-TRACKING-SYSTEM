@@ -9,7 +9,7 @@ const AdminStatistics = ({ stats }) => {
           <Statistic 
             title="Total Admins" 
             value={stats.totalAdmins} 
-            valueStyle={{ color: '#76cbba' }}
+            valueStyle={{ color: '#013F1B' }}
           />
         </Card>
         <Card style={{ flex: 1 }}>

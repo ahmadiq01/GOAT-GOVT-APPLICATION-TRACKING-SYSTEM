@@ -429,7 +429,7 @@ const OrderLogs = () => {
         borderRadius: '8px', 
         boxShadow: '0 2px 8px rgba(0,0,0,0.09)' 
       }}>
-        <Title level={2} style={{ marginBottom: '24px', color: '#76cbba' }}>
+        <Title level={2} style={{ marginBottom: '24px', color: '#013F1B' }}>
           <FileTextOutlined style={{ marginRight: '12px' }} />
           Order Logs
         </Title>
@@ -500,7 +500,7 @@ const OrderLogs = () => {
                 value={stats.totalOrderPrice} 
                 prefix="$" 
                 precision={2}
-                valueStyle={{ color: '#76cbba' }}
+                valueStyle={{ color: '#013F1B' }}
               />
             </Card>
             <Card>
@@ -574,7 +574,7 @@ const OrderLogs = () => {
       <style jsx global>{`
         .ant-table-thead > tr > th {
           background-color: #f0f5ff !important;
-          color: #76cbba !important;
+          color: #013F1B !important;
           font-weight: 600 !important;
         }
         .ant-table-tbody > tr:nth-child(even) {

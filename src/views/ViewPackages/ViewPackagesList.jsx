@@ -320,7 +320,7 @@ const ViewPackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formDa
       {/* Cards Section */}
       <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
         <AntCard style={{ flex: 1 }}>
-          <Statistic title="Highest Used Package" value={statistics.highestUsedPackage} valueStyle={{ color: '#76cbba' }} />
+          <Statistic title="Highest Used Package" value={statistics.highestUsedPackage} valueStyle={{ color: '#013F1B' }} />
         </AntCard>
         <AntCard style={{ flex: 1 }}>
           <Statistic title="Highest Region" value={statistics.highestRegion} valueStyle={{ color: '#faad14' }} />

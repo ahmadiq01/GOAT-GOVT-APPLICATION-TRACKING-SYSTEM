@@ -59,7 +59,7 @@ const UserTable = ({
       sortOrder: sortState.columnKey === 'name' ? sortState.order : null,
       render: (_, record) => (
         <Space>
-          <UserOutlined style={{ color: '#76cbba' }} />
+          <UserOutlined style={{ color: '#013F1B' }} />
           <span>{`${record.firstname || ''} ${record.lastname || ''}`}</span>
         </Space>
       ),
@@ -72,7 +72,7 @@ const UserTable = ({
       sortOrder: sortState.columnKey === 'email' ? sortState.order : null,
       render: (text) => (
         <Space>
-          <MailOutlined style={{ color: '#76cbba' }} />
+          <MailOutlined style={{ color: '#013F1B' }} />
           <span>{text}</span>
         </Space>
       ),
@@ -92,7 +92,7 @@ const UserTable = ({
       sorter: (a, b) => Number(a.isDeleted) - Number(b.isDeleted),
       sortOrder: sortState.columnKey === 'isDeleted' ? sortState.order : null,
       render: (isDeleted) => (
-        <Tag color={!isDeleted ? '#76cbba' : '#ff4d4f'} style={{ padding: '4px 12px', borderRadius: '16px', fontSize: '14px' }}>
+        <Tag color={!isDeleted ? '#013F1B' : '#ff4d4f'} style={{ padding: '4px 12px', borderRadius: '16px', fontSize: '14px' }}>
           {!isDeleted ? (
             <Space>
               <CheckCircleOutlined />
@@ -118,7 +118,7 @@ const UserTable = ({
             danger={!record.isDeleted}
             onClick={() => onStatusToggle(record._id, record.isDeleted)}
             style={{ 
-              backgroundColor: !record.isDeleted ? '#fff' : '#76cbba',
+              backgroundColor: !record.isDeleted ? '#fff' : '#013F1B',
               borderColor: !record.isDeleted ? '#ff4d4f' : '#52c41a',
               color: !record.isDeleted ? '#ff4d4f' : '#fff',
               minWidth: '90px',
@@ -132,7 +132,7 @@ const UserTable = ({
             icon={<EditOutlined />} 
             type="primary" 
             onClick={() => onUpdateUser(record)}
-            style={{ backgroundColor: '#76cbba', borderColor: '#76cbba', minWidth: '70px' }}
+            style={{ backgroundColor: '#013F1B', borderColor: '#013F1B', minWidth: '70px' }}
             size="small"
           >
             Edit
@@ -183,7 +183,7 @@ const UserTable = ({
               fontSize: '14px',
               fontWeight: '500'
             }}
-            prefix={<SearchOutlined style={{ color: '#76cbba' }} />}
+            prefix={<SearchOutlined style={{ color: '#013F1B' }} />}
             allowClear
           />
           <Select
@@ -196,7 +196,7 @@ const UserTable = ({
             <Option value="">All Users</Option>
             <Option value="active">
               <Space>
-                <CheckCircleOutlined style={{ color: '#76cbba' }} />
+                <CheckCircleOutlined style={{ color: '#013F1B' }} />
                 Active Users
               </Space>
             </Option>

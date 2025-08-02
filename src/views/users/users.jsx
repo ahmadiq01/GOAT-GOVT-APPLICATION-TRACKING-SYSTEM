@@ -225,7 +225,7 @@ const UserManagement = () => {
         message: 'User Deleted',
         description: 'User has been permanently deleted successfully.',
         placement: 'topRight',
-        icon: <DeleteOutlined style={{ color: '#76cbba' }} />,
+        icon: <DeleteOutlined style={{ color: '#013F1B' }} />,
       });
     } catch (error) {
       notification.error({
@@ -294,7 +294,7 @@ const UserManagement = () => {
   return (
     <div style={{ padding: '24px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.09)' }}>
-        <Title level={2} style={{ marginBottom: '24px', color: '#76cbba' }}>
+        <Title level={2} style={{ marginBottom: '24px', color: '#013F1B' }}>
           <UserOutlined style={{ marginRight: '12px' }} />
           App User's Management Dashboard
         </Title>
@@ -330,7 +330,7 @@ const UserManagement = () => {
           <Button key="back" onClick={handleModalCancel}>
             Cancel
           </Button>,
-          <Button key="submit" style={{ backgroundColor: '#76cbba', borderColor: '#76cbba' }} type="primary" onClick={handleModalOk}>
+          <Button key="submit" style={{ backgroundColor: '#013F1B', borderColor: '#013F1B' }} type="primary" onClick={handleModalOk}>
             Save Changes
           </Button>,
         ]}
@@ -344,14 +344,14 @@ const UserManagement = () => {
             name="firstname"
             rules={[{ required: true, message: 'Please input the first name!' }]}
           >
-            <AntdInput prefix={<UserOutlined style={{ color: '#76cbba' }} />} />
+            <AntdInput prefix={<UserOutlined style={{ color: '#013F1B' }} />} />
           </Form.Item>
           <Form.Item
             label="Last Name"
             name="lastname"
             rules={[{ required: true, message: 'Please input the last name!' }]}
           >
-            <AntdInput prefix={<UserOutlined style={{ color: '#76cbba' }} />} />
+            <AntdInput prefix={<UserOutlined style={{ color: '#013F1B' }} />} />
           </Form.Item>
           <Form.Item
             label="Email"
@@ -361,7 +361,7 @@ const UserManagement = () => {
               { type: 'email', message: 'Please enter a valid email address!' }
             ]}
           >
-            <AntdInput prefix={<MailOutlined style={{ color: '#76cbba' }} />} />
+            <AntdInput prefix={<MailOutlined style={{ color: '#013F1B' }} />} />
           </Form.Item>
           <Form.Item
             label="Phone"
@@ -387,50 +387,50 @@ const UserManagement = () => {
         }
         .ant-table-thead > tr > th {
           background-color: #f0fff7;
-          color: #76cbba;
+          color: #013F1B;
           font-weight: 600;
         }
         .ant-pagination .ant-pagination-item-active {
-          border-color: #76cbba;
+          border-color: #013F1B;
         }
         .ant-pagination .ant-pagination-item-active a {
-          color: #76cbba;
+          color: #013F1B;
         }
         .ant-pagination .ant-pagination-item:hover {
-          border-color: #76cbba;
+          border-color: #013F1B;
         }
         .ant-pagination .ant-pagination-item:hover a {
-          color: #76cbba;
+          color: #013F1B;
         }
         .ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
         .ant-pagination .ant-pagination-next:hover .ant-pagination-item-link {
-          color: #76cbba;
-          border-color: #76cbba;
+          color: #013F1B;
+          border-color: #013F1B;
         }
         .ant-pagination .ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-link-icon,
         .ant-pagination .ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-link-icon {
-          color: #76cbba;
+          color: #013F1B;
         }
         .ant-select-focused .ant-select-selector {
-          border-color: #76cbba !important;
+          border-color: #013F1B !important;
         }
         .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
           background-color: #f0fff7;
-          color: #76cbba;
+          color: #013F1B;
         }
         .ant-select:hover .ant-select-selector {
-          border-color: #76cbba;
+          border-color: #013F1B;
         }
         .ant-select-dropdown {
-          color: #76cbba;
+          color: #013F1B;
         }
         .ant-input-affix-wrapper:focus,
         .ant-input-affix-wrapper-focused {
-          border-color: #76cbba;
-          box-shadow: 0 0 0 2px rgba(118, 203, 186, 0.2);
+          border-color: #013F1B;
+          box-shadow: 0 0 0 2px rgba(1, 63, 27, 0.2);
         }
         .ant-input-affix-wrapper:hover {
-          border-color: #76cbba;
+          border-color: #013F1B;
         }
         
         /* Enhanced search box text visibility */

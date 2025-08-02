@@ -30,7 +30,7 @@ const NotificationsManagement = () => {
         
         {/* Header */}
         <Title level={2} style={{ 
-          color: '#76cbba', 
+          color: '#013F1B', 
           marginBottom: '24px',
           fontSize: '28px',
           fontWeight: '600'
@@ -111,8 +111,8 @@ const NotificationsManagement = () => {
             icon={<ExportOutlined />}
             onClick={handleBrevoRedirect}
             style={{ 
-              backgroundColor: '#76cbba', 
-              borderColor: '#76cbba',
+                      backgroundColor: '#013F1B',
+        borderColor: '#013F1B',
               height: '44px',
               fontSize: '14px',
               fontWeight: '500',

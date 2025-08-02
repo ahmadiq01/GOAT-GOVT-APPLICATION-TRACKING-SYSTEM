@@ -252,7 +252,7 @@ const AdminUserManagement = () => {
   return (
     <div style={{ padding: '24px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
       <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.09)' }}>
-        <Title level={2} style={{ marginBottom: '24px', color: '#76cbba' }}>
+        <Title level={2} style={{ marginBottom: '24px', color: '#013F1B' }}>
           <UserOutlined style={{ marginRight: '12px' }} />
           Admin User Management
         </Title>
@@ -315,7 +315,7 @@ const AdminUserManagement = () => {
         }
         .ant-table-thead > tr > th {
           background-color: #f0f5ff;
-          color: #76cbba;
+          color: #013F1B;
           font-weight: 600;
         }
       `}</style>

@@ -24,8 +24,8 @@ import AnimateButton from 'ui-component/extended/AnimateButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-// Import axios instance with dynamic URL support
-import { makeRequest } from '../../utils/axiosInstance'; // Make sure the import path is correct
+// Import axios instance with dynamic URL support (commented out for now)
+// import { makeRequest } from '../../utils/axiosInstance'; // Custom axios instance for API requests
 
 // ===============================|| JWT - LOGIN ||=============================== //
 
@@ -35,8 +35,8 @@ export default function AuthLogin() {
 
   const [checked, setChecked] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState(''); // Email state
-  const [password, setPassword] = useState(''); // Password state
+  const [username, setUsername] = useState('superadmin'); // Can be username, email, or NIC
+  const [password, setPassword] = useState('SuperAdmin123!'); // Pre-fill for testing
   const [loading, setLoading] = useState(false); // Loading state for form submission
 
   const handleClickShowPassword = () => {
@@ -47,61 +47,57 @@ export default function AuthLogin() {
     event.preventDefault();
   };
 
-  // Dynamic endpoint for login
-  const endpoint = 'login'; // Change this dynamically (e.g., 'register', 'login', etc.)
+  // Direct API endpoint
+  const endpoint = 'http://localhost:3000/api/auth/login';
 
-  // Function to handle form submission
+  // Function to handle form submission with direct fetch call
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const response = await makeRequest(endpoint, 'POST', {
-        email: email,
-        password: password,
-        isAdmin: true // You may keep or remove this depending on how your backend works
+      // Direct fetch call to the API
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: username,
+          password: password
+        })
       });
-      
-      console.log('Login response:', response.data);
-      
-      // Check if login is successful
-      if (response.data.success) {
-        const userRole = response.data.user.role.roleName;
-        const isAdmin = response.data.user.isAdmin;
-        
-        // Allow login for both Admin and SuperAdmin roles
-        if (userRole === 'Admin' || userRole === 'SuperAdmin') {
-          console.log('Access token:', response.data.accessToken);
-          localStorage.setItem("token", response.data.accessToken);
-          localStorage.setItem("userRole", JSON.stringify(response.data.user.role));
-          
-          // Store additional user info if needed
-          localStorage.setItem("userData", JSON.stringify(response.data.user));
-          
-          toast.success(`Login successful! Welcome ${userRole}. Redirecting to dashboard...`);
-          console.log('User role:', userRole);
-          console.log('User data:', response.data.user);
-          
+
+      const data = await response.json();
+      console.log('Login response:', data);
+
+      if (response.ok && data.success) {
+        const user = data.data.user;
+        const userRole = user.role?.toLowerCase();
+        const isAdmin = userRole === 'admin' || userRole === 'superadmin';
+
+        if (isAdmin) {
+          const token = data.data.token;
+          // Store token and user info in localStorage for authenticated requests
+          localStorage.setItem("token", token);
+          localStorage.setItem("userRole", user.role);
+          localStorage.setItem("userData", JSON.stringify(user));
+
+          toast.success(`Login successful! Welcome ${user.role}. Redirecting to dashboard...`);
           navigate('/dashboard');
         } else {
           toast.error('Access denied! Admin or SuperAdmin privileges required.');
         }
       } else {
-        toast.error('Login failed! Please check your credentials.');
+        const errorMessage = data.message || 'Login failed! Please check your credentials.';
+        toast.error(errorMessage);
       }
     } catch (error) {
       console.error('Error during login:', error);
       
-      // Handle different error scenarios
-      if (error.response) {
-        // Server responded with error status
-        const errorMessage = error.response.data?.message || 'Login failed! Please check your credentials.';
-        toast.error(errorMessage);
-      } else if (error.request) {
-        // Request was made but no response received
-        toast.error('Network error! Please check your connection.');
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        toast.error('Network error! Please check if the server is running on localhost:3000');
       } else {
-        // Something else happened
         toast.error('Something went wrong! Please try again.');
       }
     } finally {
@@ -110,15 +106,15 @@ export default function AuthLogin() {
   };
 
   return (
-    <form onSubmit={handleSubmit}> {/* Use onSubmit for the form */}
+    <form onSubmit={handleSubmit}>
       <FormControl fullWidth sx={{ ...theme.typography.customInput }}>
-        <InputLabel htmlFor="outlined-adornment-email-login">Email Address / Username</InputLabel>
+        <InputLabel htmlFor="outlined-adornment-username-login">Username / Email / NIC</InputLabel>
         <OutlinedInput
-          id="outlined-adornment-email-login"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)} // Update email state
-          name="email"
+          id="outlined-adornment-username-login"
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          name="username"
           required
         />
       </FormControl>
@@ -129,7 +125,7 @@ export default function AuthLogin() {
           id="outlined-adornment-password-login"
           type={showPassword ? 'text' : 'password'}
           value={password}
-          onChange={(e) => setPassword(e.target.value)} // Update password state
+          onChange={(e) => setPassword(e.target.value)}
           name="password"
           required
           endAdornment={

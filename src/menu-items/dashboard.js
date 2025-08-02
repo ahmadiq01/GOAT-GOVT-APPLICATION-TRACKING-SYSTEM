@@ -23,10 +23,11 @@ const icons = {
 // Function to get user role from localStorage
 const getUserRole = () => {
   try {
+    // userRole is stored as a string (e.g., "superadmin" or "admin")
     const userRole = localStorage.getItem('userRole');
-    return userRole ? JSON.parse(userRole) : null;
+    return userRole ? userRole.toLowerCase() : null;
   } catch (error) {
-    console.error('Error parsing user role:', error);
+    console.error('Error reading user role:', error);
     return null;
   }
 };
@@ -122,18 +123,16 @@ const menuItems = [
 const getFilteredMenuItems = () => {
   const userRole = getUserRole();
   const userData = getUserData();
-  
+
   if (!userRole || !userData) {
     return []; // Return empty array if no role found
   }
-  
-  const currentUserRole = userRole.roleName;
-  
-  // Filter menu items based on user role
-  const filteredItems = menuItems.filter(item => 
-    item.roles.includes(currentUserRole)
+
+  // Filter menu items based on user role (case-insensitive)
+  const filteredItems = menuItems.filter(item =>
+    item.roles.map(r => r.toLowerCase()).includes(userRole)
   );
-  
+
   return filteredItems;
 };
 
