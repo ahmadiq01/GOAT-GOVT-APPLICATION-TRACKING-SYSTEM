@@ -14,15 +14,30 @@ import {
   TablePagination,
   Paper,
   Chip,
-  CircularProgress
+  CircularProgress,
+  Alert
 } from '@mui/material';
 import {
   Assignment as AssignmentIcon,
   CheckCircle as CheckCircleIcon,
   Pending as PendingIcon,
   HourglassEmpty as HourglassEmptyIcon,
-  TrendingUp as TrendingUpIcon
+  TrendingUp as TrendingUpIcon,
+  Person as PersonIcon,
+  Inventory as PackageIcon,
+  ShoppingCart as ShoppingCartIcon
 } from '@mui/icons-material';
+
+// Function to get user role from localStorage
+const getUserRole = () => {
+  try {
+    const userRole = localStorage.getItem('userRole');
+    return userRole ? userRole.toLowerCase() : null;
+  } catch (error) {
+    console.error('Error reading user role:', error);
+    return null;
+  }
+};
 
 // Stats Cards Component following packages styling
 const StatsCards = ({ stats }) => {
@@ -79,6 +94,55 @@ const StatsCards = ({ stats }) => {
             <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
               {stats.inProcess}
               <HourglassEmptyIcon color="info" sx={{ ml: 1 }} />
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
+  );
+};
+
+// User-specific stats cards
+const UserStatsCards = ({ stats }) => {
+  return (
+    <Grid container spacing={3} sx={{ mb: 3 }}>
+      <Grid item xs={12} sm={6} md={4}>
+        <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>
+              My Applications
+            </Typography>
+            <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+              {stats.myApplications}
+              <AssignmentIcon color="primary" sx={{ ml: 1 }} />
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      
+      <Grid item xs={12} sm={6} md={4}>
+        <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>
+              My Orders
+            </Typography>
+            <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+              {stats.myOrders}
+              <ShoppingCartIcon color="success" sx={{ ml: 1 }} />
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      
+      <Grid item xs={12} sm={6} md={4}>
+        <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>
+              Available Packages
+            </Typography>
+            <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+              {stats.availablePackages}
+              <PackageIcon color="info" sx={{ ml: 1 }} />
             </Typography>
           </CardContent>
         </Card>
@@ -271,17 +335,49 @@ const Dashboard = () => {
     inProcess: 144
   };
 
+  const userRole = getUserRole();
+  const isAdmin = userRole === 'admin' || userRole === 'superadmin';
+  const isUser = userRole === 'user';
+
+  // User-specific stats
+  const userStats = {
+    myApplications: 5,
+    myOrders: 12,
+    availablePackages: 25
+  };
+
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h2" sx={{ mb: 3 }}>
         Dashboard
       </Typography>
 
-      {/* Stats Cards */}
-      <StatsCards stats={stats} />
+      {isAdmin ? (
+        <>
+          {/* Admin Stats Cards */}
+          <StatsCards stats={stats} />
 
-      {/* Posts Table */}
-      <PostsTable posts={dummyPosts} loading={false} />
+          {/* Posts Table */}
+          <PostsTable posts={dummyPosts} loading={false} />
+        </>
+      ) : isUser ? (
+        <>
+          {/* User-specific Stats Cards */}
+          <UserStatsCards stats={userStats} />
+
+          {/* Welcome message for users */}
+          <Alert severity="info" sx={{ mb: 3 }}>
+            Welcome to your dashboard! Here you can view your applications, orders, and available packages.
+          </Alert>
+
+          {/* Posts Table - simplified for users */}
+          <PostsTable posts={dummyPosts} loading={false} />
+        </>
+      ) : (
+        <Alert severity="warning">
+          Unable to determine user role. Please contact support.
+        </Alert>
+      )}
     </Box>
   );
 };

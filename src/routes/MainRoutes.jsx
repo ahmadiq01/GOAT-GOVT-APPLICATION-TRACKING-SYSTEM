@@ -64,6 +64,14 @@ const MainRoutes = {
       element: <ProtectedRoute><PackagesManagement /></ProtectedRoute>
     },
     {
+      path: '/my-applications',
+      element: <ProtectedRoute><div>My Applications Page - Coming Soon</div></ProtectedRoute>
+    },
+    {
+      path: '/my-orders',
+      element: <ProtectedRoute><div>My Orders Page - Coming Soon</div></ProtectedRoute>
+    },
+    {
       path: 'dashboard',
       children: [
         {

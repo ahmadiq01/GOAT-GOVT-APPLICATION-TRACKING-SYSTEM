@@ -52,7 +52,7 @@ const menuItems = [
     url: '/dashboard',
     icon: icons.IconDashboard,
     breadcrumbs: false,
-    roles: ['Admin', 'SuperAdmin'] // Both roles can access dashboard
+    roles: ['Admin', 'SuperAdmin', 'User'] // All roles can access dashboard
   },
   {
     id: 'user',
@@ -117,6 +117,24 @@ const menuItems = [
     icon: icons.IconAsset,
     breadcrumbs: false,
     roles: ['Admin', 'SuperAdmin'] // Both roles can manage assets
+  },
+  {
+    id: 'my-applications',
+    title: 'My Applications',
+    type: 'item',
+    url: '/my-applications',
+    icon: icons.IconFileText,
+    breadcrumbs: false,
+    roles: ['User'] // Only users can see their own applications
+  },
+  {
+    id: 'my-orders',
+    title: 'My Orders',
+    type: 'item',
+    url: '/my-orders',
+    icon: icons.IconShoppingCart,
+    breadcrumbs: false,
+    roles: ['User'] // Only users can see their own orders
   }
 ];
 

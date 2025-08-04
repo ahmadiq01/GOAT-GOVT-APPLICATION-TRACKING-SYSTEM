@@ -74,9 +74,9 @@ export default function AuthLogin() {
       if (response.ok && data.success) {
         const user = data.data.user;
         const userRole = user.role?.toLowerCase();
-        const isAdmin = userRole === 'admin' || userRole === 'superadmin';
+        const isAuthorized = userRole === 'admin' || userRole === 'superadmin' || userRole === 'user';
 
-        if (isAdmin) {
+        if (isAuthorized) {
           const token = data.data.token;
           // Store token and user info in localStorage for authenticated requests
           localStorage.setItem("token", token);
@@ -86,7 +86,7 @@ export default function AuthLogin() {
           toast.success(`Login successful! Welcome ${user.role}. Redirecting to dashboard...`);
           navigate('/dashboard');
         } else {
-          toast.error('Access denied! Admin or SuperAdmin privileges required.');
+          toast.error('Access denied! Admin, SuperAdmin, or User privileges required.');
         }
       } else {
         const errorMessage = data.message || 'Login failed! Please check your credentials.';
