@@ -61,6 +61,7 @@ const menuItems = [
     url: '/users',
     icon: icons.IconUsers,
     breadcrumbs: false,
+    // roles: ['Admin', 'SuperAdmin'] // Both roles can manage app users
     roles: ['Admin', 'SuperAdmin'] // Both roles can manage app users
   },
   {
