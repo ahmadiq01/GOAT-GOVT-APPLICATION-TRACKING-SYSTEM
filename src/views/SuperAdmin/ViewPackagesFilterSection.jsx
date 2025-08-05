@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Button, Chip, FormControl, Grid, InputLabel, MenuItem, Paper, Select, TextField, Typography } from '@mui/material';
 import { FilterAlt as FilterIcon, Refresh as RefreshIcon } from '@mui/icons-material';
 
-const FilterSection = ({ filters, setFilters, uniqueRegions, allCountries }) => {
+const ViewFilterSection = ({ filters, setFilters, uniqueRegions, allCountries }) => {
   const [innerFilters, setInnerFilters] = useState(filters);
 
   useEffect(() => {
@@ -25,14 +25,14 @@ const FilterSection = ({ filters, setFilters, uniqueRegions, allCountries }) => 
   const handleResetFilters = (e) => {
     e.preventDefault();
     const resetFilters = {
-      validityDays: '',
-      priceUSD: '',
+      maxValidity: '',
       region: '',
       type: '',
+      minPrice: '',
+      maxPrice: '',
+      fixedCost: '',
       unlimited: '',
-      destinationCountry: '',
-      dataVolume: '',
-      name: ''
+      destinationCountry: ''
     };
     setInnerFilters(resetFilters);
     setFilters(resetFilters);
@@ -164,6 +164,7 @@ const FilterSection = ({ filters, setFilters, uniqueRegions, allCountries }) => 
               </Select>
             </FormControl>
           </Grid>
+          {/* Validity Days Single Filter */}
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               fullWidth
@@ -176,6 +177,7 @@ const FilterSection = ({ filters, setFilters, uniqueRegions, allCountries }) => 
               inputProps={{ min: 1 }}
             />
           </Grid>
+          {/* Price USD Single Filter */}
           <Grid item xs={12} sm={6} md={3}>
             <TextField
               fullWidth
@@ -217,4 +219,4 @@ const FilterSection = ({ filters, setFilters, uniqueRegions, allCountries }) => 
   );
 };
 
-export default FilterSection;
+export default ViewFilterSection; 

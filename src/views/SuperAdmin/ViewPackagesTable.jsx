@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Button, Chip, CircularProgress, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Typography } from '@mui/material';
 import { Refresh as RefreshIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
-const PackageTable = ({ 
+const ViewPackagesTable = ({ 
   displayPackages, 
   packages, 
   page, 
@@ -60,8 +60,9 @@ const PackageTable = ({
                 <TableCell align="left">Validity</TableCell>
                 <TableCell align="left">Region</TableCell>
                 <TableCell align="left">Destination Countries</TableCell>
+                <TableCell align="left">Unlimited</TableCell>
+                <TableCell align="left">Actions</TableCell>
                 <TableCell align="left">Options</TableCell>
-                <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -104,6 +105,35 @@ const PackageTable = ({
                         : '-'}
                     </TableCell>
                     <TableCell align="left">
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: pkg.unlimited ? 'green' : 'red',
+                          fontWeight: 'bold',
+                        }}
+                      >
+                        {pkg.unlimited ? 'Yes' : 'No'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => handleEdit(pkg)}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => handleDeletePackage(pkg._id)}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </TableCell>
+                    <TableCell align="left">
                       <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
                         {pkg.topUpAvailable && (
                           <Chip
@@ -139,24 +169,6 @@ const PackageTable = ({
                         )}
                       </Box>
                     </TableCell>
-                    <TableCell align="right">
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => handleEdit(pkg)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeletePackage(pkg._id)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
                   </TableRow>
                 ))
               )}
@@ -181,4 +193,4 @@ const PackageTable = ({
   );
 };
 
-export default PackageTable;
+export default ViewPackagesTable;

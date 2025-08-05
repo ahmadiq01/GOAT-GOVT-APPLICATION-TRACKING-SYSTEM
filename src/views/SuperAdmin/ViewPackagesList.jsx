@@ -36,14 +36,38 @@ import {
 } from '@mui/icons-material';
 import { Card as AntCard } from 'antd';
 import { Statistic } from 'antd';
-import FilterSection from './FilterSection';
-import PackageForm from './PackageForm';
-import PackageTable from './PackageTable';
+import FilterSection from './ViewPackagesFilterSection';
+// import PackageForm from './PackageForm';
+import PackageTable from './ViewPackagesTable';
 
 // Import the axiosInstance
 import { axiosInstance } from '../../utils/axiosInstance'; // Adjust path as needed
 
-const PackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, setFormData, handleEdit }) => {
+// Add a static list of all countries
+const allCountries = [
+  'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Australia', 'Austria',
+  'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bhutan',
+  'Bolivia', 'Bosnia and Herzegovina', 'Botswana', 'Brazil', 'Brunei', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cabo Verde', 'Cambodia',
+  'Cameroon', 'Canada', 'Central African Republic', 'Chad', 'Chile', 'China', 'Colombia', 'Comoros', 'Congo', 'Costa Rica',
+  'Croatia', 'Cuba', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt',
+  'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Eswatini', 'Ethiopia', 'Fiji', 'Finland', 'France', 'Gabon',
+  'Gambia', 'Georgia', 'Germany', 'Ghana', 'Greece', 'Grenada', 'Guatemala', 'Guinea', 'Guinea-Bissau', 'Guyana',
+  'Haiti', 'Honduras', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq', 'Ireland',
+  'Italy', 'Jamaica', 'Japan', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', 'Kuwait', 'Kyrgyzstan', 'Laos',
+  'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Madagascar', 'Malawi',
+  'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Mauritania', 'Mauritius', 'Mexico', 'Micronesia', 'Moldova',
+  'Monaco', 'Mongolia', 'Montenegro', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands',
+  'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'North Korea', 'North Macedonia', 'Norway', 'Oman', 'Pakistan', 'Palau',
+  'Palestine', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Poland', 'Portugal', 'Qatar', 'Romania',
+  'Russia', 'Rwanda', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal',
+  'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Korea',
+  'South Sudan', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan',
+  'Tanzania', 'Thailand', 'Timor-Leste', 'Togo', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Tuvalu',
+  'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Vatican City', 'Venezuela',
+  'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
+];
+
+const ViewPackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, setFormData, handleEdit }) => {
   const [packages, setPackages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -61,12 +85,14 @@ const PackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, 
     region: '',
     type: '',
     unlimited: '',
-    destinationCountry: ''
+    destinationCountry: '',
+    dataVolume: '',
+    name: ''
   });
 
   // For filter options - we'll fetch these separately
   const [uniqueRegions, setUniqueRegions] = useState([]);
-  const [allCountries, setAllCountries] = useState([]);
+  const [uniqueCountries, setUniqueCountries] = useState([]);
 
   // Statistics states
   const [statistics, setStatistics] = useState({
@@ -90,6 +116,8 @@ const PackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, 
         if (currentFilters.region) params.append('region', currentFilters.region);
         if (currentFilters.validityDays) params.append('validityDays', currentFilters.validityDays);
         if (currentFilters.unlimited !== '') params.append('unlimited', currentFilters.unlimited);
+        if (currentFilters.dataVolume) params.append('dataVolume', currentFilters.dataVolume);
+        if (currentFilters.name) params.append('name', currentFilters.name);
       } else if (currentFilters.type === 'region') {
         if (!currentFilters.region) {
           setLoading(false);
@@ -102,6 +130,8 @@ const PackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, 
         if (currentFilters.priceUSD) params.append('priceUSD', currentFilters.priceUSD);
         if (currentFilters.validityDays) params.append('validityDays', currentFilters.validityDays);
         if (currentFilters.unlimited !== '') params.append('unlimited', currentFilters.unlimited);
+        if (currentFilters.dataVolume) params.append('dataVolume', currentFilters.dataVolume);
+        if (currentFilters.name) params.append('name', currentFilters.name);
       } else if (currentFilters.type === 'country') {
         if (!currentFilters.destinationCountry) {
           setLoading(false);
@@ -114,12 +144,16 @@ const PackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, 
         if (currentFilters.priceUSD) params.append('priceUSD', currentFilters.priceUSD);
         if (currentFilters.validityDays) params.append('validityDays', currentFilters.validityDays);
         if (currentFilters.unlimited !== '') params.append('unlimited', currentFilters.unlimited);
+        if (currentFilters.dataVolume) params.append('dataVolume', currentFilters.dataVolume);
+        if (currentFilters.name) params.append('name', currentFilters.name);
       } else {
         if (currentFilters.region) params.append('region', currentFilters.region);
         if (currentFilters.destinationCountry) params.append('country', currentFilters.destinationCountry);
         if (currentFilters.priceUSD) params.append('priceUSD', currentFilters.priceUSD);
         if (currentFilters.validityDays) params.append('validityDays', currentFilters.validityDays);
         if (currentFilters.unlimited !== '') params.append('unlimited', currentFilters.unlimited);
+        if (currentFilters.dataVolume) params.append('dataVolume', currentFilters.dataVolume);
+        if (currentFilters.name) params.append('name', currentFilters.name);
       }
       const apiUrl = `https://esim.codistan.org/api/payment/Bundlecatalogue?${params.toString()}`;
       const response = await axiosInstance.get(apiUrl);
@@ -149,16 +183,17 @@ const PackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, 
   const fetchFilterOptions = async () => {
     try {
       const response = await axiosInstance.get('https://esim.codistan.org/api/payment/Bundlecatalogue?page=1&limit=100');
+      
       if (response.data && response.data.data && response.data.data.paginatedBundles) {
         const packages = response.data.data.paginatedBundles;
+        
         const regions = Array.from(new Set(packages.map(pkg => pkg.region).filter(Boolean)));
         setUniqueRegions(regions);
+
         const countries = Array.from(new Set(packages.flatMap(pkg => pkg.destinationCountries || []))).sort();
-        setAllCountries(countries);
+        setUniqueCountries(countries);
       }
     } catch (error) {
-      setUniqueRegions([]);
-      setAllCountries([]);
       console.error('Failed to fetch filter options:', error);
     }
   };
@@ -195,11 +230,6 @@ const PackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, 
     setPage(0);
     fetchPackages(0, rowsPerPage, filters);
   }, [filters]);
-
-  // Update filter options when type changes
-  useEffect(() => {
-    fetchFilterOptions();
-  }, []);
 
   // Handle page changes
   const handleChangePage = (event, newPage) => {
@@ -311,6 +341,7 @@ const PackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, 
         filters={filters}
         setFilters={setFilters}
         uniqueRegions={uniqueRegions}
+        uniqueCountries={uniqueCountries}
         allCountries={allCountries}
       />
       
@@ -332,7 +363,7 @@ const PackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, 
       />
       
       {/* Package Form Modal */}
-      <PackageForm
+      {/* <PackageForm
         isModalOpen={isModalOpen}
         setIsModalOpen={setIsModalOpen}
         formData={formData}
@@ -340,9 +371,9 @@ const PackagesList = ({ isModalOpen, setIsModalOpen, selectedPackage, formData, 
         selectedPackage={selectedPackage}
         handleAddPackage={handleAddPackage}
         handleUpdatePackage={handleUpdatePackage}
-      />
+      /> */}
     </>
   );
 };
 
-export default PackagesList;
+export default ViewPackagesList;

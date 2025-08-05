@@ -2,14 +2,8 @@ import { lazy } from 'react';
 import { Navigate } from 'react-router-dom';
 import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
-import UserManagement from '../views/users/users';
-import ViewPackages from '../views/ViewPackages/ViewPackages.jsx';
-import PackagesManagement from '../views/packages-management/packages';
-import OrdersManagement from '../views/orders/orders.jsx';
+import ViewPackages from '../views/Admin/ViewPackages.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
-import NotificationsManagement from '../views/notifications/notifications';
-import AdminManagement from '../views/admin/admin';
-import OrderLogs from '../views/orderlogs/orderlogs.jsx';
 
 // Dashboard routing
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
@@ -18,9 +12,6 @@ const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')))
 const UtilsTypography = Loadable(lazy(() => import('views/utilities/Typography')));
 const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
 const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
-
-// Sample page routing
-const SamplePage = Loadable(lazy(() => import('views/sample-page')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 const MainRoutes = {
@@ -36,32 +27,20 @@ const MainRoutes = {
       element: <ProtectedRoute><DashboardDefault/></ProtectedRoute>
     },
     {
-      path: '/users',
-      element: <ProtectedRoute><UserManagement /></ProtectedRoute>
-    },
-    {
       path: '/ViewPackages',
       element: <ProtectedRoute><ViewPackages/></ProtectedRoute>
     },
     {
       path: '/orders',
-      element: <ProtectedRoute><OrdersManagement /></ProtectedRoute>
-    },
-    {
-      path: '/order-logs',
-      element: <ProtectedRoute><OrderLogs /></ProtectedRoute>
+      element: <ProtectedRoute><div>Orders Management Page - Coming Soon</div></ProtectedRoute>
     },
     {
       path: '/assets',
-      element: <ProtectedRoute><NotificationsManagement /></ProtectedRoute>
-    },
-    {
-      path: '/admin',
-      element: <ProtectedRoute><AdminManagement /></ProtectedRoute>
+      element: <ProtectedRoute><div>Notifications Management Page - Coming Soon</div></ProtectedRoute>
     },
     {
       path: '/packages-management',
-      element: <ProtectedRoute><PackagesManagement /></ProtectedRoute>
+      element: <ProtectedRoute><div>Packages Management Page - Coming Soon</div></ProtectedRoute>
     },
     {
       path: '/my-applications',
@@ -91,10 +70,6 @@ const MainRoutes = {
     {
       path: 'shadow',
       element: <ProtectedRoute><UtilsShadow /></ProtectedRoute>
-    },
-    {
-      path: '/sample-page',
-      element: <ProtectedRoute><SamplePage /></ProtectedRoute>
     }
   ]
 };
