@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Get baseURL from environment variables (for Vite apps)
-const baseURL = import.meta.env.VITE_APP_BASE_NAME_baseURL || 'https://esim.codistan.org/api';
+const baseURL = import.meta.env.VITE_APP_BASE_NAME_baseURL || 'http://localhost:3000/api';
 
 // Create an axios instance with default configuration
 const axiosInstance = axios.create({

@@ -4,19 +4,21 @@ import MainLayout from 'layout/MainLayout';
 import Loadable from 'ui-component/Loadable';
 import ViewPackages from '../views/Admin/ViewPackages.jsx';
 import ProtectedRoute from './ProtectedRoute.jsx';
+import ErrorBoundary from './ErrorBoundary.jsx';
 
 // Dashboard routing
-const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
+const DashboardDefault = Loadable(lazy(() => import('../views/dashboard/Default/index.jsx')));
 
 // Utility routing
-const UtilsTypography = Loadable(lazy(() => import('views/utilities/Typography')));
-const UtilsColor = Loadable(lazy(() => import('views/utilities/Color')));
-const UtilsShadow = Loadable(lazy(() => import('views/utilities/Shadow')));
+const UtilsTypography = Loadable(lazy(() => import('../views/utilities/Typography.jsx')));
+const UtilsColor = Loadable(lazy(() => import('../views/utilities/Color.jsx')));
+const UtilsShadow = Loadable(lazy(() => import('../views/utilities/Shadow.jsx')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 const MainRoutes = {
   path: '/',
   element: <MainLayout />,
+  errorElement: <ErrorBoundary />,
   children: [
     {
       path: '/',
@@ -29,26 +31,6 @@ const MainRoutes = {
     {
       path: '/ViewPackages',
       element: <ProtectedRoute><ViewPackages/></ProtectedRoute>
-    },
-    {
-      path: '/orders',
-      element: <ProtectedRoute><div>Orders Management Page - Coming Soon</div></ProtectedRoute>
-    },
-    {
-      path: '/assets',
-      element: <ProtectedRoute><div>Notifications Management Page - Coming Soon</div></ProtectedRoute>
-    },
-    {
-      path: '/packages-management',
-      element: <ProtectedRoute><div>Packages Management Page - Coming Soon</div></ProtectedRoute>
-    },
-    {
-      path: '/my-applications',
-      element: <ProtectedRoute><div>My Applications Page - Coming Soon</div></ProtectedRoute>
-    },
-    {
-      path: '/my-orders',
-      element: <ProtectedRoute><div>My Orders Page - Coming Soon</div></ProtectedRoute>
     },
     {
       path: 'dashboard',

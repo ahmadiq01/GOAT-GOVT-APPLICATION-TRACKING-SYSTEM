@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -16,7 +16,8 @@ import {
   Container,
   styled,
   useTheme,
-  Divider
+  Divider,
+  CircularProgress
 } from '@mui/material';
 import {
   AccountBalance as GovIcon,
@@ -25,17 +26,9 @@ import {
   Description as DescriptionIcon,
   Warning as ComplaintIcon
 } from '@mui/icons-material';
+import { axiosInstance } from '../../utils/axiosInstance';
 
-const complaintTypes = [
-  'Public Service Issue',
-  'Infrastructure Problem',
-  'Administrative Complaint',
-  'Utility Services',
-  'Municipal Services',
-  'Traffic & Transportation',
-  'Environmental Issue',
-  'Other',
-];
+// Removed complaintTypes array as we'll use application types from API
 
 // Styled components for government styling with green theme
 const GovPaper = styled(Paper)(({ theme }) => ({
@@ -137,9 +130,41 @@ export default function ComplaintRegistrationForm() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
-  const [complaintType, setComplaintType] = useState('');
   const [complaintDetails, setComplaintDetails] = useState('');
   const [attachments, setAttachments] = useState([]);
+  
+  // New state for API data
+  const [officers, setOfficers] = useState([]);
+  const [applicationTypes, setApplicationTypes] = useState([]);
+  const [selectedOfficer, setSelectedOfficer] = useState('');
+  const [selectedApplicationType, setSelectedApplicationType] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
+
+  // Fetch officers and application types on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      setApiError('');
+      
+      try {
+        // Fetch officers
+        const officersResponse = await axiosInstance.get('/officers');
+        setOfficers(officersResponse.data?.data || []);
+        
+        // Fetch application types
+        const applicationTypesResponse = await axiosInstance.get('/application-types');
+        setApplicationTypes(applicationTypesResponse.data?.data || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setApiError('Failed to load form data. Please refresh the page.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleFileChange = (e) => {
     setAttachments(Array.from(e.target.files));
@@ -153,11 +178,26 @@ export default function ComplaintRegistrationForm() {
       phone, 
       email, 
       address, 
-      complaintType, 
       complaintDetails, 
-      attachments 
+      attachments,
+      selectedOfficer,
+      selectedApplicationType
     });
   };
+
+  if (loading) {
+    return (
+      <Box sx={{
+        minHeight: '100vh',
+        backgroundColor: '#f5f5f5',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <CircularProgress size={60} sx={{ color: '#00ce5a' }} />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{
@@ -209,6 +249,13 @@ export default function ComplaintRegistrationForm() {
           </Typography>
         </HeaderBox>
 
+        {/* API Error Alert */}
+        {apiError && (
+          <Alert severity="error" sx={{ mb: 3, borderRadius: 1 }}>
+            {apiError}
+          </Alert>
+        )}
+
         {/* Form Card */}
         <GovPaper elevation={2}>
           <Box sx={{ mb: 4 }}>
@@ -224,7 +271,7 @@ export default function ComplaintRegistrationForm() {
               Complaint Registration Form
             </Typography>
             <Typography variant="body2" sx={{ color: '#666', mb: 2 }}>
-              Please fill all required fields marked with asterisk (*) accurately
+              Please fill all required fields accurately
             </Typography>
             <Divider sx={{ bgcolor: '#00ce5a', height: 2 }} />
           </Box>
@@ -248,7 +295,7 @@ export default function ComplaintRegistrationForm() {
               <Grid item xs={12} md={6}>
                 <GovTextField
                   fullWidth
-                  label="Full Name *"
+                  label="Full Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -261,7 +308,7 @@ export default function ComplaintRegistrationForm() {
               <Grid item xs={12} md={6}>
                 <GovTextField
                   fullWidth
-                  label="CNIC Number *"
+                  label="CNIC Number"
                   value={cnic}
                   onChange={(e) => setCnic(e.target.value)}
                   required
@@ -275,7 +322,7 @@ export default function ComplaintRegistrationForm() {
               <Grid item xs={12} md={6}>
                 <GovTextField
                   fullWidth
-                  label="Mobile Number *"
+                  label="Mobile Number"
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
@@ -302,7 +349,7 @@ export default function ComplaintRegistrationForm() {
               <Grid item xs={12}>
                 <GovTextField
                   fullWidth
-                  label="Complete Address *"
+                  label="Complete Address"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   required
@@ -326,45 +373,53 @@ export default function ComplaintRegistrationForm() {
                 </Typography>
               </Grid>
 
-              {/* Complaint Type */}
+              {/* Application Type Selection */}
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth required>
-                  <InputLabel sx={{ fontWeight: 500 }}>Complaint Category *</InputLabel>
+                  <InputLabel sx={{ fontWeight: 500 }}>Application Type</InputLabel>
                   <GovSelect
-                    value={complaintType}
-                    onChange={(e) => setComplaintType(e.target.value)}
-                    label="Complaint Category *"
+                    value={selectedApplicationType}
+                    onChange={(e) => setSelectedApplicationType(e.target.value)}
+                    label="Application Type"
                   >
-                    {complaintTypes.map((type) => (
-                      <MenuItem key={type} value={type}>
-                        {type}
+                    <MenuItem value="">
+                      <em>Select application type</em>
+                    </MenuItem>
+                    {applicationTypes.map((type) => (
+                      <MenuItem key={type._id} value={type._id}>
+                        {type.name}
                       </MenuItem>
                     ))}
                   </GovSelect>
                 </FormControl>
               </Grid>
 
+              {/* Officer Selection */}
               <Grid item xs={12} md={6}>
-                <Box sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  alignItems: 'center',
-                  bgcolor: '#e8f8f0',
-                  p: 2,
-                  borderRadius: 1,
-                  border: '1px solid #b8e6c1'
-                }}>
-                  <Typography variant="body2" sx={{ color: '#00a047', fontWeight: 500 }}>
-                    Select the most appropriate category for faster processing
-                  </Typography>
-                </Box>
+                <FormControl fullWidth required>
+                  <InputLabel sx={{ fontWeight: 500 }}>Select Officer</InputLabel>
+                  <GovSelect
+                    value={selectedOfficer}
+                    onChange={(e) => setSelectedOfficer(e.target.value)}
+                    label="Select Officer"
+                  >
+                    <MenuItem value="">
+                      <em>Select an officer</em>
+                    </MenuItem>
+                    {officers.map((officer) => (
+                      <MenuItem key={officer._id} value={officer._id}>
+                        {officer.name} - {officer.designation}
+                      </MenuItem>
+                    ))}
+                  </GovSelect>
+                </FormControl>
               </Grid>
 
               {/* Complaint Details */}
               <Grid item xs={12}>
                 <GovTextField
                   fullWidth
-                  label="Detailed Complaint Description *"
+                  label="Detailed Complaint Description"
                   value={complaintDetails}
                   onChange={(e) => setComplaintDetails(e.target.value)}
                   required
