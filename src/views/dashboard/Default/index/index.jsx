@@ -1,8 +1,8 @@
 import React from 'react';
 import { Box, Typography, Alert } from '@mui/material';
-import AdminDashboard from './Admin/admn';
-import SuperAdminDashboard from './SuperAdmin/superadmin';
-import UserDashboard from './User/user';
+import AdminDashboard from '../Admin/admn';
+import SuperAdminDashboard from '../SuperAdmin/superadmin';
+import UserDashboard from '../User/user';
 
 // Function to get user role from localStorage
 const getUserRole = () => {
