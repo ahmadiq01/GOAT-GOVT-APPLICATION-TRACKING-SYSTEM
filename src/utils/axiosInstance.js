@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Get baseURL from environment variables (for Vite apps)
-const baseURL = import.meta.env.VITE_APP_BASE_NAME_baseURL || 'http://localhost:3000/api';
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'https://goat-govt-application-tracking-system-backend-production.up.railway.app/api';
 
 // Create an axios instance with default configuration
 const axiosInstance = axios.create({
