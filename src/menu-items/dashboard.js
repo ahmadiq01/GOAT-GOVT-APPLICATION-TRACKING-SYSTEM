@@ -68,10 +68,10 @@ const menuItems = [
     id: 'admin',
     title: 'Admin Users',
     type: 'item',
-    url: '/admin',
+    url: '/user',
     icon: icons.IconUsers,
     breadcrumbs: false,
-    roles: ['SuperAdmin'] // Only SuperAdmin can manage admin users
+    roles: ["Admin",'SuperAdmin'] // Only SuperAdmin can manage admin users
   },
   {
     id: 'my-applications',

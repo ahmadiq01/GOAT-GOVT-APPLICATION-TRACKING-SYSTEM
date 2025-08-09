@@ -16,7 +16,7 @@ const AuthenticationRoutes = {
   children: [
     {
       path: '/',
-      element: <LoginPage /> // Make login the default route
+      element: <RegisterUser /> // Make register-user the default route
     },
     {
       path: '/login',

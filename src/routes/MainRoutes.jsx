@@ -22,7 +22,7 @@ const MainRoutes = {
   children: [
     {
       path: '/',
-      element: <Navigate to="/login" replace /> // Redirect root to login
+      element: <Navigate to="/register-user" replace /> // Redirect root to register-user
     },
     {
       path: '/dashboard',
