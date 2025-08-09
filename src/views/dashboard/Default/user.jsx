@@ -44,7 +44,7 @@ const UserStatsCards = ({ stats }) => {
         <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
           <CardContent>
             <Typography color="textSecondary" gutterBottom>
-              My Orders
+              Pending
             </Typography>
             <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
               {stats.myOrders}
@@ -58,7 +58,7 @@ const UserStatsCards = ({ stats }) => {
         <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
           <CardContent>
             <Typography color="textSecondary" gutterBottom>
-              Available Packages
+              Completed
             </Typography>
             <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
               {stats.availablePackages}

@@ -72,24 +72,6 @@ const menuItems = [
     icon: icons.IconUsers,
     breadcrumbs: false,
     roles: ["Admin",'SuperAdmin'] // Only SuperAdmin can manage admin users
-  },
-  {
-    id: 'my-applications',
-    title: 'My Applications',
-    type: 'item',
-    url: '/my-applications',
-    icon: icons.IconFileText,
-    breadcrumbs: false,
-    roles: ['User'] // Only users can see their own applications
-  },
-  {
-    id: 'my-orders',
-    title: 'My Orders',
-    type: 'item',
-    url: '/my-orders',
-    icon: icons.IconShoppingCart,
-    breadcrumbs: false,
-    roles: ['User'] // Only users can see their own orders
   }
 ];
 
