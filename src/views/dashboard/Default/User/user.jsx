@@ -36,7 +36,8 @@ const mockApplications = [
     officer: 'John Smith',
     date: '2024-08-05',
     requiresFeedback: false,
-    pdfUrl: '/documents/app_001.pdf'
+    pdfUrl: '/documents/app_001.pdf',
+    remarks: 'Application submitted successfully. Awaiting initial review.'
   },
   {
     id: 2,
@@ -45,7 +46,8 @@ const mockApplications = [
     officer: 'Sarah Johnson',
     date: '2024-08-03',
     requiresFeedback: true,
-    pdfUrl: '/documents/app_002.pdf'
+    pdfUrl: '/documents/app_002.pdf',
+    remarks: 'Additional documentation required for tax compliance verification.'
   },
   {
     id: 3,
@@ -54,7 +56,8 @@ const mockApplications = [
     officer: 'Mike Wilson',
     date: '2024-07-28',
     requiresFeedback: false,
-    pdfUrl: '/documents/app_003.pdf'
+    pdfUrl: '/documents/app_003.pdf',
+    remarks: 'Permit approved. Valid for 12 months from issue date.'
   },
   {
     id: 4,
@@ -63,7 +66,8 @@ const mockApplications = [
     officer: 'Lisa Chen',
     date: '2024-08-01',
     requiresFeedback: false,
-    pdfUrl: '/documents/app_004.pdf'
+    pdfUrl: '/documents/app_004.pdf',
+    remarks: 'Currently under technical review by customs department.'
   },
   {
     id: 5,
@@ -72,7 +76,8 @@ const mockApplications = [
     officer: 'David Brown',
     date: '2024-07-30',
     requiresFeedback: true,
-    pdfUrl: '/documents/app_005.pdf'
+    pdfUrl: '/documents/app_005.pdf',
+    remarks: 'Health inspection report needs clarification on safety protocols.'
   },
   {
     id: 6,
@@ -81,7 +86,8 @@ const mockApplications = [
     officer: 'Emma Davis',
     date: '2024-07-25',
     requiresFeedback: false,
-    pdfUrl: '/documents/app_006.pdf'
+    pdfUrl: '/documents/app_006.pdf',
+    remarks: 'Assessment completed. No significant environmental impact found.'
   },
   {
     id: 7,
@@ -90,7 +96,8 @@ const mockApplications = [
     officer: 'Tom Wilson',
     date: '2024-08-07',
     requiresFeedback: false,
-    pdfUrl: '/documents/app_007.pdf'
+    pdfUrl: '/documents/app_007.pdf',
+    remarks: 'Scheduled for fire safety inspection next week.'
   },
   {
     id: 8,
@@ -99,7 +106,8 @@ const mockApplications = [
     officer: 'Alex Rodriguez',
     date: '2024-08-02',
     requiresFeedback: false,
-    pdfUrl: '/documents/app_008.pdf'
+    pdfUrl: '/documents/app_008.pdf',
+    remarks: 'Planning committee reviewing variance request for compliance.'
   }
 ];
 
@@ -180,19 +188,21 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick }) => {
               <TableCell align="left">Status</TableCell>
               <TableCell align="left">Assigned Officer</TableCell>
               <TableCell align="left">Date</TableCell>
-              <TableCell align="left">Actions</TableCell>
+              <TableCell align="left">Remarks</TableCell>
+              <TableCell align="left">Action</TableCell>
+              <TableCell align="left">Download PDF</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                   <CircularProgress size={24} />
                 </TableCell>
               </TableRow>
             ) : displayApplications.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                   <Typography variant="body1" color="text.secondary">
                     No applications found
                   </Typography>
@@ -229,27 +239,45 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick }) => {
                     </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      {application.requiresFeedback && (
-                        <Button
-                          startIcon={<FeedbackIcon />}
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          onClick={() => onFeedbackClick(application)}
-                        >
-                          Submit Feedback
-                        </Button>
-                      )}
-                      <IconButton
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        maxWidth: 250, 
+                        overflow: 'hidden', 
+                        textOverflow: 'ellipsis', 
+                        whiteSpace: 'nowrap' 
+                      }}
+                      title={application.remarks}
+                    >
+                      {application.remarks || 'No remarks'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="left">
+                    {application.requiresFeedback ? (
+                      <Button
+                        startIcon={<FeedbackIcon />}
+                        variant="contained"
+                        color="primary"
                         size="small"
-                        color="info"
-                        onClick={() => handleDownloadPDF(application.pdfUrl, application.applicationSubject)}
-                        title="Download PDF"
+                        onClick={() => onFeedbackClick(application)}
                       >
-                        <DownloadIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
+                        Submit Feedback
+                      </Button>
+                    ) : (
+                      <Typography variant="body2" color="text.secondary">
+                        No action required
+                      </Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="left">
+                    <IconButton
+                      size="small"
+                      color="info"
+                      onClick={() => handleDownloadPDF(application.pdfUrl, application.applicationSubject)}
+                      title="Download PDF"
+                    >
+                      <DownloadIcon fontSize="small" />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))
