@@ -65,24 +65,6 @@ const menuItems = [
     roles: ['Admin', 'SuperAdmin'] // Both roles can manage packages
   },
   {
-    id: 'packages management',
-    title: 'Packages Management',
-    type: 'item',
-    url: '/packages-management',
-    icon: icons.IconFileText,
-    breadcrumbs: false,
-    roles: ['Admin', 'SuperAdmin'] // Both roles can manage order logs
-  },
-  {
-    id: 'orders',
-    title: 'Orders',
-    type: 'item',
-    url: '/orders',
-    icon: icons.IconShoppingCart,
-    breadcrumbs: false,
-    roles: ['Admin', 'SuperAdmin'] // Both roles can manage orders
-  },
-  {
     id: 'admin',
     title: 'Admin Users',
     type: 'item',
@@ -90,24 +72,6 @@ const menuItems = [
     icon: icons.IconUsers,
     breadcrumbs: false,
     roles: ['SuperAdmin'] // Only SuperAdmin can manage admin users
-  },
-  {
-    id: 'orderlogs',
-    title: 'Order Logs',
-    type: 'item',
-    url: '/order-logs',
-    icon: icons.IconFileText,
-    breadcrumbs: false,
-    roles: ['Admin', 'SuperAdmin'] // Both roles can manage order logs
-  },
-   {
-    id: 'assets',
-    title: 'Assets',
-    type: 'item',
-    url: '/assets',
-    icon: icons.IconAsset,
-    breadcrumbs: false,
-    roles: ['Admin', 'SuperAdmin'] // Both roles can manage assets
   },
   {
     id: 'my-applications',
