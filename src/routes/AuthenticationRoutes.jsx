@@ -3,7 +3,7 @@ import { lazy } from 'react';
 // project imports
 import Loadable from 'ui-component/Loadable';
 import MinimalLayout from 'layout/MinimalLayout';
-import RegisterUser from 'views/auth-forms/register-user';
+import RegisterUser from 'views/auth-forms/register-user/register-user';
 
 // maintenance routing
 const LoginPage = Loadable(lazy(() => import('views/authentication/Login')));

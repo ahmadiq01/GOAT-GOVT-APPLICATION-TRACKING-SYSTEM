@@ -17,18 +17,20 @@ import {
   styled,
   useTheme,
   Divider,
-  CircularProgress
+  CircularProgress,
+  ToggleButton,
+  ToggleButtonGroup
 } from '@mui/material';
 import {
   AccountBalance as GovIcon,
   CloudUpload as CloudUploadIcon,
   Send as SendIcon,
   Description as DescriptionIcon,
-  Warning as ComplaintIcon
+  Warning as ComplaintIcon,
+  PersonAdd as NewUserIcon,
+  Person as ExistingUserIcon
 } from '@mui/icons-material';
-import { axiosInstance } from '../../utils/axiosInstance';
-
-// Removed complaintTypes array as we'll use application types from API
+import { axiosInstance } from '../../../utils/axiosInstance';
 
 // Styled components for government styling with green theme
 const GovPaper = styled(Paper)(({ theme }) => ({
@@ -123,6 +125,28 @@ const HeaderBox = styled(Box)(({ theme }) => ({
   boxShadow: '0 4px 12px rgba(1, 63, 27, 0.3)',
 }));
 
+const GovToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
+  '& .MuiToggleButton-root': {
+    border: `2px solid #00ce5a`,
+    borderRadius: theme.spacing(0.5),
+    padding: theme.spacing(1.5, 3),
+    fontWeight: 600,
+    color: '#00ce5a',
+    backgroundColor: '#ffffff',
+    '&:hover': {
+      backgroundColor: '#e8f8f0',
+      borderColor: '#00a047',
+    },
+    '&.Mui-selected': {
+      backgroundColor: '#00ce5a',
+      color: '#ffffff',
+      '&:hover': {
+        backgroundColor: '#00a047',
+      }
+    }
+  }
+}));
+
 export default function ComplaintRegistrationForm() {
   const theme = useTheme();
   const [name, setName] = useState('');
@@ -132,6 +156,9 @@ export default function ComplaintRegistrationForm() {
   const [address, setAddress] = useState('');
   const [complaintDetails, setComplaintDetails] = useState('');
   const [attachments, setAttachments] = useState([]);
+  
+  // New state for registration type
+  const [registrationType, setRegistrationType] = useState('new');
   
   // New state for API data
   const [officers, setOfficers] = useState([]);
@@ -166,6 +193,19 @@ export default function ComplaintRegistrationForm() {
     fetchData();
   }, []);
 
+  const handleRegistrationTypeChange = (event, newRegistrationType) => {
+    if (newRegistrationType !== null) {
+      setRegistrationType(newRegistrationType);
+      // Clear form fields when switching registration type
+      if (newRegistrationType === 'existing') {
+        setName('');
+        setPhone('');
+        setEmail('');
+        setAddress('');
+      }
+    }
+  };
+
   const handleFileChange = (e) => {
     setAttachments(Array.from(e.target.files));
   };
@@ -173,11 +213,12 @@ export default function ComplaintRegistrationForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log({ 
-      name, 
+      registrationType,
+      name: registrationType === 'new' ? name : '', 
       cnic, 
-      phone, 
-      email, 
-      address, 
+      phone: registrationType === 'new' ? phone : '', 
+      email: registrationType === 'new' ? email : '', 
+      address: registrationType === 'new' ? address : '', 
       complaintDetails, 
       attachments,
       selectedOfficer,
@@ -278,7 +319,7 @@ export default function ComplaintRegistrationForm() {
 
           <Box component="form" onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              {/* Personal Information Section */}
+              {/* Registration Type Selection */}
               <Grid item xs={12}>
                 <Typography variant="h6" sx={{
                   fontWeight: 600,
@@ -287,21 +328,133 @@ export default function ComplaintRegistrationForm() {
                   pb: 1,
                   borderBottom: '2px solid #e0e0e0'
                 }}>
-                  Personal Information
+                  Registration Type
                 </Typography>
+                
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                  <GovToggleButtonGroup
+                    value={registrationType}
+                    exclusive
+                    onChange={handleRegistrationTypeChange}
+                    aria-label="registration type"
+                  >
+                    <ToggleButton value="new" aria-label="new user">
+                      <NewUserIcon sx={{ mr: 1 }} />
+                      New Registration
+                    </ToggleButton>
+                    <ToggleButton value="existing" aria-label="existing user">
+                      <ExistingUserIcon sx={{ mr: 1 }} />
+                      Registered Before
+                    </ToggleButton>
+                  </GovToggleButtonGroup>
+                </Box>
+
+                <Alert 
+                  severity="info" 
+                  sx={{ 
+                    borderRadius: 1,
+                    bgcolor: '#e8f8f0',
+                    border: '1px solid #b8e6c1',
+                    '& .MuiAlert-icon': {
+                      color: '#00ce5a'
+                    }
+                  }}
+                >
+                  {registrationType === 'new' ? (
+                    <Typography variant="body2" sx={{ color: '#00a047' }}>
+                      <strong>New Registration:</strong> Please fill in all your personal details below.
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" sx={{ color: '#00a047' }}>
+                      <strong>Existing User:</strong> Only provide your CNIC number. Your other details will be retrieved from our records.
+                    </Typography>
+                  )}
+                </Alert>
               </Grid>
 
-              {/* Name Field */}
-              <Grid item xs={12} md={6}>
-                <GovTextField
-                  fullWidth
-                  label="Full Name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                  placeholder="Enter your complete name as per CNIC"
-                  variant="outlined"
-                />
+              {/* Personal Information Section - Only show for new users */}
+              {registrationType === 'new' && (
+                <>
+                  <Grid item xs={12}>
+                    <Typography variant="h6" sx={{
+                      fontWeight: 600,
+                      color: '#424242',
+                      mb: 2,
+                      pb: 1,
+                      borderBottom: '2px solid #e0e0e0'
+                    }}>
+                      Personal Information
+                    </Typography>
+                  </Grid>
+
+                  {/* Name Field */}
+                  <Grid item xs={12} md={6}>
+                    <GovTextField
+                      fullWidth
+                      label="Full Name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      placeholder="Enter your complete name as per CNIC"
+                      variant="outlined"
+                    />
+                  </Grid>
+
+                  {/* Phone Field */}
+                  <Grid item xs={12} md={6}>
+                    <GovTextField
+                      fullWidth
+                      label="Mobile Number"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      required
+                      placeholder="+92-300-0000000"
+                      variant="outlined"
+                    />
+                  </Grid>
+
+                  {/* Email Field */}
+                  <Grid item xs={12} md={6}>
+                    <GovTextField
+                      fullWidth
+                      label="Email Address"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="your.email@example.com"
+                      variant="outlined"
+                    />
+                  </Grid>
+
+                  {/* Address Field */}
+                  <Grid item xs={12} md={6}>
+                    <GovTextField
+                      fullWidth
+                      label="Complete Address"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      required
+                      placeholder="House/Flat No., Street, Area, City, Province"
+                      variant="outlined"
+                      multiline
+                      rows={2}
+                    />
+                  </Grid>
+                </>
+              )}
+
+              {/* CNIC Section - Always visible */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 600,
+                  color: '#424242',
+                  mb: 2,
+                  pb: 1,
+                  borderBottom: '2px solid #e0e0e0'
+                }}>
+                  {registrationType === 'existing' ? 'User Identification' : 'Identity Verification'}
+                </Typography>
               </Grid>
 
               {/* CNIC Field */}
@@ -315,48 +468,6 @@ export default function ComplaintRegistrationForm() {
                   placeholder="00000-0000000-0"
                   variant="outlined"
                   inputProps={{ maxLength: 15 }}
-                />
-              </Grid>
-
-              {/* Phone Field */}
-              <Grid item xs={12} md={6}>
-                <GovTextField
-                  fullWidth
-                  label="Mobile Number"
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  required
-                  placeholder="+92-300-0000000"
-                  variant="outlined"
-                />
-              </Grid>
-
-              {/* Email Field */}
-              <Grid item xs={12} md={6}>
-                <GovTextField
-                  fullWidth
-                  label="Email Address"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="your.email@example.com"
-                  variant="outlined"
-                />
-              </Grid>
-
-              {/* Address Field */}
-              <Grid item xs={12}>
-                <GovTextField
-                  fullWidth
-                  label="Complete Address"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  required
-                  placeholder="House/Flat No., Street, Area, City, Province"
-                  variant="outlined"
-                  multiline
-                  rows={2}
                 />
               </Grid>
 
