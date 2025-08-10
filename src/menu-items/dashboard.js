@@ -6,7 +6,9 @@ import {
   IconShoppingCart, 
   IconBell, 
   IconFileText, 
-  IconAsset
+  IconAsset,
+  IconSettings,
+  IconClipboardList
 } from '@tabler/icons-react';
 
 // constant
@@ -17,7 +19,9 @@ const icons = {
   IconShoppingCart,
   IconBell,
   IconFileText,
-  IconAsset
+  IconAsset,
+  IconSettings,
+  IconClipboardList
 };
 
 // Function to get user role from localStorage
@@ -45,33 +49,42 @@ const getUserData = () => {
 
 // Define menu items with role permissions
 const menuItems = [
+  // Super Admin specific menu items
   {
-    id: 'default',
-    title: 'Dashboard',
+    id: 'super-admin-dashboard',
+    title: 'Super Admin Dashboard',
     type: 'item',
-    url: '/dashboard',
+    url: '/super-admin/dashboard',
     icon: icons.IconDashboard,
     breadcrumbs: false,
-    roles: ['Admin', 'SuperAdmin', 'User'] // All roles can access dashboard
-  },
-  
-  {
-    id: 'packages',
-    title: 'View Packages',
-    type: 'item',
-    url: '/ViewPackages',
-    icon: icons.IconPackage,
-    breadcrumbs: false,
-    roles: ['Admin', 'SuperAdmin'] // Both roles can manage packages
+    roles: ['SuperAdmin']
   },
   {
-    id: 'admin',
-    title: 'Admin Users',
+    id: 'user-management',
+    title: 'User Management',
     type: 'item',
-    url: '/user',
+    url: '/super-admin/user-management',
     icon: icons.IconUsers,
     breadcrumbs: false,
-    roles: ["Admin",'SuperAdmin'] // Only SuperAdmin can manage admin users
+    roles: ['SuperAdmin']
+  },
+  {
+    id: 'application-management',
+    title: 'Application Management',
+    type: 'item',
+    url: '/super-admin/applications',
+    icon: icons.IconClipboardList,
+    breadcrumbs: false,
+    roles: ['SuperAdmin']
+  },
+  {
+    id: 'notification-center',
+    title: 'Notification Center',
+    type: 'item',
+    url: '/super-admin/notifications',
+    icon: icons.IconBell,
+    breadcrumbs: false,
+    roles: ['SuperAdmin']
   }
 ];
 

@@ -13,20 +13,24 @@ import {
   TableHead,
   TableRow,
   TablePagination,
-  Chip
+  Chip,
+  Button,
+  IconButton
 } from '@mui/material';
 import {
   Assignment as AssignmentIcon,
   CheckCircle as CheckCircleIcon,
   Pending as PendingIcon,
   HourglassEmpty as HourglassEmptyIcon,
-  TrendingUp as TrendingUpIcon
+  Cancel as CancelIcon,
+  Visibility as VisibilityIcon,
+  Edit as EditIcon
 } from '@mui/icons-material';
 
 const StatsCards = ({ stats }) => {
   return (
     <Grid container spacing={3} sx={{ mb: 3 }}>
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid item xs={12} sm={6} md={2.4}>
         <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
           <CardContent>
             <Typography color="textSecondary" gutterBottom>
@@ -40,7 +44,49 @@ const StatsCards = ({ stats }) => {
         </Card>
       </Grid>
 
-      <Grid item xs={12} sm={6} md={3}>
+      <Grid item xs={12} sm={6} md={2.4}>
+        <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>
+              Submitted
+            </Typography>
+            <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+              {stats.submitted}
+              <PendingIcon color="info" sx={{ ml: 1 }} />
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12} sm={6} md={2.4}>
+        <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>
+              Under Review
+            </Typography>
+            <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+              {stats.underReview}
+              <HourglassEmptyIcon color="warning" sx={{ ml: 1 }} />
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12} sm={6} md={2.4}>
+        <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
+          <CardContent>
+            <Typography color="textSecondary" gutterBottom>
+              In Progress
+            </Typography>
+            <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
+              {stats.inProgress}
+              <HourglassEmptyIcon color="info" sx={{ ml: 1 }} />
+            </Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+
+      <Grid item xs={12} sm={6} md={2.4}>
         <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
           <CardContent>
             <Typography color="textSecondary" gutterBottom>
@@ -53,63 +99,111 @@ const StatsCards = ({ stats }) => {
           </CardContent>
         </Card>
       </Grid>
-
-      <Grid item xs={12} sm={6} md={3}>
-        <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              Pending
-            </Typography>
-            <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-              {stats.pending}
-              <PendingIcon color="warning" sx={{ ml: 1 }} />
-            </Typography>
-          </CardContent>
-        </Card>
-      </Grid>
-
-      <Grid item xs={12} sm={6} md={3}>
-        <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
-          <CardContent>
-            <Typography color="textSecondary" gutterBottom>
-              In Process
-            </Typography>
-            <Typography variant="h4" component="div" sx={{ display: 'flex', alignItems: 'center' }}>
-              {stats.inProcess}
-              <HourglassEmptyIcon color="info" sx={{ ml: 1 }} />
-            </Typography>
-          </CardContent>
-        </Card>
-      </Grid>
     </Grid>
   );
 };
 
-const dummyPosts = [
-  { id: 1, title: 'New Package Launch', author: 'John Doe', status: 'Published', date: '2024-01-15', views: 1250 },
-  { id: 2, title: 'Updated Pricing Strategy', author: 'Jane Smith', status: 'Draft', date: '2024-01-14', views: 890 },
-  { id: 3, title: 'Customer Success Story', author: 'Mike Johnson', status: 'Published', date: '2024-01-13', views: 2100 },
-  { id: 4, title: 'Technical Documentation', author: 'Sarah Wilson', status: 'Review', date: '2024-01-12', views: 567 },
-  { id: 5, title: 'Marketing Campaign Results', author: 'David Brown', status: 'Published', date: '2024-01-11', views: 1890 },
-  { id: 6, title: 'Product Update Announcement', author: 'Lisa Chen', status: 'Published', date: '2024-01-10', views: 3200 },
-  { id: 7, title: 'User Guide Release', author: 'Tom Wilson', status: 'Draft', date: '2024-01-09', views: 450 },
-  { id: 8, title: 'Security Update Notice', author: 'Alex Rodriguez', status: 'Published', date: '2024-01-08', views: 1780 }
+const dummyApplications = [
+  { 
+    id: 1, 
+    applicantName: 'John Smith', 
+    description: 'Visa Application for Tourism', 
+    officerAssigned: 'Officer A. Johnson', 
+    status: 'Under Review', 
+    remarks: 'Initial review completed',
+    submittedDate: '2024-01-15',
+    attachedDocuments: ['passport.pdf', 'photo.jpg']
+  },
+  { 
+    id: 2, 
+    applicantName: 'Sarah Williams', 
+    description: 'Business License Application', 
+    officerAssigned: 'Officer M. Davis', 
+    status: 'In Progress', 
+    remarks: 'Awaiting additional documentation',
+    submittedDate: '2024-01-14',
+    attachedDocuments: ['business_plan.pdf', 'financial_statements.xlsx']
+  },
+  { 
+    id: 3, 
+    applicantName: 'Michael Brown', 
+    description: 'Work Permit Application', 
+    officerAssigned: 'Officer L. Wilson', 
+    status: 'Completed', 
+    remarks: 'Approved and processed',
+    submittedDate: '2024-01-13',
+    attachedDocuments: ['contract.pdf', 'qualifications.pdf', 'medical_report.pdf']
+  },
+  { 
+    id: 4, 
+    applicantName: 'Emily Johnson', 
+    description: 'Student Visa Application', 
+    officerAssigned: 'Officer R. Garcia', 
+    status: 'Submitted', 
+    remarks: 'Pending initial review',
+    submittedDate: '2024-01-12',
+    attachedDocuments: ['admission_letter.pdf', 'transcript.pdf']
+  },
+  { 
+    id: 5, 
+    applicantName: 'David Miller', 
+    description: 'Immigration Application', 
+    officerAssigned: 'Officer K. Martinez', 
+    status: 'Rejected', 
+    remarks: 'Missing required documentation',
+    submittedDate: '2024-01-11',
+    attachedDocuments: ['application_form.pdf']
+  },
+  { 
+    id: 6, 
+    applicantName: 'Lisa Anderson', 
+    description: 'Property Registration', 
+    officerAssigned: 'Officer T. Thompson', 
+    status: 'Under Review', 
+    remarks: 'Property verification in progress',
+    submittedDate: '2024-01-10',
+    attachedDocuments: ['property_deed.pdf', 'survey_report.pdf', 'valuation.pdf']
+  },
+  { 
+    id: 7, 
+    applicantName: 'Robert Taylor', 
+    description: 'Tax Exemption Application', 
+    officerAssigned: 'Officer S. White', 
+    status: 'In Progress', 
+    remarks: 'Tax assessment under review',
+    submittedDate: '2024-01-09',
+    attachedDocuments: ['tax_returns.pdf', 'financial_audit.pdf']
+  },
+  { 
+    id: 8, 
+    applicantName: 'Jennifer Wilson', 
+    description: 'Medical License Renewal', 
+    officerAssigned: 'Officer P. Lee', 
+    status: 'Completed', 
+    remarks: 'License renewed successfully',
+    submittedDate: '2024-01-08',
+    attachedDocuments: ['medical_certificate.pdf', 'cme_credits.pdf', 'malpractice_insurance.pdf']
+  }
 ];
 
 const getStatusColor = (status) => {
   switch (status) {
-    case 'Published':
+    case 'Completed':
       return 'success';
-    case 'Draft':
-      return 'warning';
-    case 'Review':
+    case 'In Progress':
       return 'info';
+    case 'Under Review':
+      return 'warning';
+    case 'Submitted':
+      return 'default';
+    case 'Rejected':
+      return 'error';
     default:
       return 'default';
   }
 };
 
-const PostsTable = ({ posts, loading }) => {
+const ApplicationsTable = ({ applications, loading, onViewDetails, onEdit }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -119,59 +213,104 @@ const PostsTable = ({ posts, loading }) => {
     setPage(0);
   };
 
-  const displayPosts = posts.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const displayApplications = applications.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Paper elevation={0} sx={{ overflow: 'hidden', borderRadius: 2 }}>
       <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
         <Typography variant="subtitle1" fontWeight="medium" align="left">
-          Recent Posts ({posts.length} total)
+          Recent Applications ({applications.length} total)
         </Typography>
       </Box>
       <TableContainer>
         <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow sx={{ bgcolor: '#f8fafc' }}>
-              <TableCell align="left">Title</TableCell>
-              <TableCell align="left">Author</TableCell>
+              <TableCell align="left">Applicant Name</TableCell>
+              <TableCell align="left">Description</TableCell>
+              <TableCell align="left">Officer Assigned</TableCell>
               <TableCell align="left">Status</TableCell>
-              <TableCell align="left">Date</TableCell>
-              <TableCell align="left">Views</TableCell>
+              <TableCell align="left">Submitted Date</TableCell>
+              <TableCell align="left">Documents</TableCell>
+              <TableCell align="left">Remarks</TableCell>
+              <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 3 }}>
                   Loading...
                 </TableCell>
               </TableRow>
-            ) : displayPosts.length === 0 ? (
+            ) : displayApplications.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={8} align="center" sx={{ py: 4 }}>
                   <Typography variant="body1" color="text.secondary">
-                    No posts found
+                    No applications found
                   </Typography>
                 </TableCell>
               </TableRow>
             ) : (
-              displayPosts.map((post) => (
-                <TableRow key={post.id} hover>
+              displayApplications.map((application) => (
+                <TableRow key={application.id} hover>
                   <TableCell align="left">
                     <Typography variant="body2" fontWeight="medium">
-                      {post.title}
+                      {application.applicantName}
                     </Typography>
                   </TableCell>
-                  <TableCell align="left">{post.author}</TableCell>
                   <TableCell align="left">
-                    <Chip label={post.status} color={getStatusColor(post.status)} size="small" variant="outlined" />
-                  </TableCell>
-                  <TableCell align="left">{post.date}</TableCell>
-                  <TableCell align="left">
-                    <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                      {post.views.toLocaleString()}
-                      <TrendingUpIcon color="success" sx={{ ml: 1, fontSize: 16 }} />
+                    <Typography variant="body2" sx={{ maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {application.description}
                     </Typography>
+                  </TableCell>
+                  <TableCell align="left">{application.officerAssigned}</TableCell>
+                  <TableCell align="left">
+                    <Chip 
+                      label={application.status} 
+                      color={getStatusColor(application.status)} 
+                      size="small" 
+                      variant="outlined" 
+                    />
+                  </TableCell>
+                  <TableCell align="left">{application.submittedDate}</TableCell>
+                  <TableCell align="left">
+                    <Typography variant="body2" color="primary">
+                      {application.attachedDocuments.length} files
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="left">
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
+                        maxWidth: 150, 
+                        overflow: 'hidden', 
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}
+                    >
+                      {application.remarks}
+                    </Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => onViewDetails(application)}
+                        title="View Details"
+                      >
+                        <VisibilityIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        size="small"
+                        color="secondary"
+                        onClick={() => onEdit(application)}
+                        title="Edit Application"
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))
@@ -182,7 +321,7 @@ const PostsTable = ({ posts, loading }) => {
       <TablePagination
         rowsPerPageOptions={[5, 10, 25]}
         component="div"
-        count={posts.length}
+        count={applications.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
@@ -194,20 +333,36 @@ const PostsTable = ({ posts, loading }) => {
   );
 };
 
-const SuperAdminDashboard = () => {
+const SuperAdminApplicationDashboard = ({ onManageApplications }) => {
   const stats = {
-    totalApplications: 1234,
-    completed: 856,
-    pending: 234,
-    inProcess: 144
+    totalApplications: 1856,
+    submitted: 234,
+    underReview: 412,
+    inProgress: 567,
+    completed: 643
+  };
+
+  const handleViewDetails = (application) => {
+    console.log('View details for:', application);
+    onManageApplications();
+  };
+
+  const handleEdit = (application) => {
+    console.log('Edit application:', application);
+    onManageApplications();
   };
 
   return (
     <>
       <StatsCards stats={stats} />
-      <PostsTable posts={dummyPosts} loading={false} />
+      <ApplicationsTable 
+        applications={dummyApplications} 
+        loading={false} 
+        onViewDetails={handleViewDetails}
+        onEdit={handleEdit}
+      />
     </>
   );
 };
 
-export default SuperAdminDashboard;
+export default SuperAdminApplicationDashboard;

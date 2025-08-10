@@ -9,8 +9,13 @@ import ErrorBoundary from './ErrorBoundary';
 
 // pages (lazy-loaded)
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
-const ViewPackages = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewPackages')));
 const FeedbackSubmission = Loadable(lazy(() => import('views/dashboard/Default/User/FeedbackeSubmisson')));
+
+// Super Admin specific components
+const SuperAdminDashboard = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/MainDashboardWrapper')));
+const UserManagement = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewUserManagement')));
+const NotificationCenter = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewNotificationCenter')));
+const ApplicationManagement = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ApplicationManagement')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 const MainRoutes = {
@@ -28,8 +33,14 @@ const MainRoutes = {
     // Dashboard
     { path: '/dashboard', element: <DashboardDefault /> },
 
-    // Example additional routes used in the app
-    { path: '/ViewPackages', element: <ViewPackages /> },
+    // Super Admin Routes
+    { path: '/super-admin', element: <SuperAdminDashboard /> },
+    { path: '/super-admin/dashboard', element: <SuperAdminDashboard /> },
+    { path: '/super-admin/user-management', element: <UserManagement /> },
+    { path: '/super-admin/notifications', element: <NotificationCenter /> },
+    { path: '/super-admin/applications', element: <ApplicationManagement /> },
+
+    // User routes
     { path: '/feedback', element: <FeedbackSubmission /> }
   ]
 };
