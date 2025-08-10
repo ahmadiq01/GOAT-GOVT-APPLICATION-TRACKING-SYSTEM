@@ -8,7 +8,10 @@ import {
   IconFileText, 
   IconAsset,
   IconSettings,
-  IconClipboardList
+  IconClipboardList,
+  IconFileDescription,
+  IconMessageCircle,
+  IconChecklist
 } from '@tabler/icons-react';
 
 // constant
@@ -21,7 +24,10 @@ const icons = {
   IconFileText,
   IconAsset,
   IconSettings,
-  IconClipboardList
+  IconClipboardList,
+  IconFileDescription,
+  IconMessageCircle,
+  IconChecklist
 };
 
 // Function to get user role from localStorage
@@ -85,6 +91,43 @@ const menuItems = [
     icon: icons.IconBell,
     breadcrumbs: false,
     roles: ['SuperAdmin']
+  },
+  // Admin specific menu items
+  {
+    id: 'admin-dashboard',
+    title: 'Admin Dashboard',
+    type: 'item',
+    url: '/admin/dashboard',
+    icon: icons.IconDashboard,
+    breadcrumbs: false,
+    roles: ['Admin']
+  },
+  {
+    id: 'received-applications',
+    title: 'Received Applications',
+    type: 'item',
+    url: '/admin/applications',
+    icon: icons.IconFileDescription,
+    breadcrumbs: false,
+    roles: ['Admin']
+  },
+  {
+    id: 'application-processing',
+    title: 'Application Processing',
+    type: 'item',
+    url: '/admin/processing',
+    icon: icons.IconChecklist,
+    breadcrumbs: false,
+    roles: ['Admin']
+  },
+  {
+    id: 'feedback-management',
+    title: 'Feedback Management',
+    type: 'item',
+    url: '/admin/feedback',
+    icon: icons.IconMessageCircle,
+    breadcrumbs: false,
+    roles: ['Admin']
   }
 ];
 
