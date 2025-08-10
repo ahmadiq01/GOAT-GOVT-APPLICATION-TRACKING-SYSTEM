@@ -24,8 +24,8 @@ import AnimateButton from 'ui-component/extended/AnimateButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 
-// Import axios instance with dynamic URL support (commented out for now)
-// import { makeRequest } from '../../utils/axiosInstance'; // Custom axios instance for API requests
+// Import axios instance
+import { axiosInstance } from '../../utils/axiosInstance';
 
 // ===============================|| JWT - LOGIN ||=============================== //
 
@@ -47,31 +47,22 @@ export default function AuthLogin() {
     event.preventDefault();
   };
 
-  // Direct API endpoint
-  const endpoint = 'http://localhost:3000/api/auth/login';
-
-  // Function to handle form submission with direct fetch call
+  // Function to handle form submission with axios
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // Direct fetch call to the API
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: username,
-          password: password
-        })
+      // Use axios to make the API call
+      const response = await axiosInstance.post('/auth/login', {
+        username: username,
+        password: password
       });
 
-      const data = await response.json();
+      const data = response.data;
       console.log('Login response:', data);
 
-      if (response.ok && data.success) {
+      if (data.success) {
         const user = data.data.user;
         const userRole = user.role?.toLowerCase();
         const isAuthorized = userRole === 'admin' || userRole === 'superadmin' || userRole === 'user';
@@ -95,9 +86,15 @@ export default function AuthLogin() {
     } catch (error) {
       console.error('Error during login:', error);
       
-      if (error.name === 'TypeError' && error.message.includes('fetch')) {
-        toast.error('Network error! Please check if the server is running on localhost:3000');
+      if (error.response) {
+        // Server responded with error status
+        const errorMessage = error.response.data?.message || 'Login failed! Please check your credentials.';
+        toast.error(errorMessage);
+      } else if (error.request) {
+        // Network error
+        toast.error('Network error! Please check your internet connection.');
       } else {
+        // Other error
         toast.error('Something went wrong! Please try again.');
       }
     } finally {
