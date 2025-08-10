@@ -339,7 +339,7 @@ const UserDashboard = () => {
 
   const handleFeedbackClick = (application) => {
     // Navigate to feedback page with application data
-    navigate('/feedback', { state: { application } });
+    navigate('/app/feedback', { state: { application } });
   };
 
   return (

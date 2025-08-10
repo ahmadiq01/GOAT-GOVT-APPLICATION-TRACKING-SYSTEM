@@ -155,11 +155,11 @@ const AdminApplications = () => {
   };
 
   const handleViewApplication = (applicationId) => {
-    navigate(`/admin/applications/${applicationId}`);
+    navigate(`/app/admin/applications/${applicationId}`);
   };
 
   const handleProcessApplication = (applicationId) => {
-    navigate(`/admin/applications/${applicationId}/process`);
+    navigate(`/app/admin/applications/${applicationId}/process`);
   };
 
   const handleRefresh = () => {

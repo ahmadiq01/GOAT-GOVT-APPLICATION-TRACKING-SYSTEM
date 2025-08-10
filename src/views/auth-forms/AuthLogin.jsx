@@ -75,7 +75,7 @@ export default function AuthLogin() {
           localStorage.setItem("userData", JSON.stringify(user));
 
           toast.success(`Login successful! Welcome ${user.role}. Redirecting to dashboard...`);
-          navigate('/dashboard');
+          navigate('/app/dashboard');
         } else {
           toast.error('Access denied! Admin, SuperAdmin, or User privileges required.');
         }

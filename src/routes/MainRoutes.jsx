@@ -19,7 +19,7 @@ const ApplicationManagement = Loadable(lazy(() => import('views/dashboard/Defaul
 
 // ==============================|| MAIN ROUTING ||============================== //
 const MainRoutes = {
-  path: '/',
+  path: '/app',
   element: (
     <ProtectedRoute>
       <MainLayout />
@@ -28,20 +28,20 @@ const MainRoutes = {
   errorElement: <ErrorBoundary />,
   children: [
     // Default redirect to dashboard when under main layout
-    { index: true, element: <Navigate to="/dashboard" replace /> },
+    { index: true, element: <Navigate to="/app/dashboard" replace /> },
 
     // Dashboard
-    { path: '/dashboard', element: <DashboardDefault /> },
+    { path: 'dashboard', element: <DashboardDefault /> },
 
     // Super Admin Routes
-    { path: '/super-admin', element: <SuperAdminDashboard /> },
-    { path: '/super-admin/dashboard', element: <SuperAdminDashboard /> },
-    { path: '/super-admin/user-management', element: <UserManagement /> },
-    { path: '/super-admin/notifications', element: <NotificationCenter /> },
-    { path: '/super-admin/applications', element: <ApplicationManagement /> },
+    { path: 'super-admin', element: <SuperAdminDashboard /> },
+    { path: 'super-admin/dashboard', element: <SuperAdminDashboard /> },
+    { path: 'super-admin/user-management', element: <UserManagement /> },
+    { path: 'super-admin/notifications', element: <NotificationCenter /> },
+    { path: 'super-admin/applications', element: <ApplicationManagement /> },
 
     // User routes
-    { path: '/feedback', element: <FeedbackSubmission /> }
+    { path: 'feedback', element: <FeedbackSubmission /> }
   ]
 };
 

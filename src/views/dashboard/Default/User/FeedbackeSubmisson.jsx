@@ -50,7 +50,7 @@ const FeedbackSubmission = () => {
   // Redirect if no application data
   useEffect(() => {
     if (!application) {
-      navigate('/dashboard');
+      navigate('/app/dashboard');
     }
   }, [application, navigate]);
 
@@ -169,7 +169,7 @@ const FeedbackSubmission = () => {
 
       // Navigate back to dashboard after successful submission
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/app/dashboard');
       }, 2000);
 
     } catch (error) {
@@ -197,7 +197,7 @@ const FeedbackSubmission = () => {
       <Paper elevation={1} sx={{ mb: 3 }}>
         <Box sx={{ py: 3, px: 4 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconButton onClick={() => navigate('/dashboard')}>
+            <IconButton onClick={() => navigate('/app/dashboard')}>
               <ArrowBackIcon />
             </IconButton>
             <Typography variant="h4" component="h1" fontWeight="bold" color="textPrimary">
@@ -361,7 +361,7 @@ const FeedbackSubmission = () => {
                       <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
                         <Button
                           variant="outlined"
-                          onClick={() => navigate('/dashboard')}
+                          onClick={() => navigate('/app/dashboard')}
                           disabled={loading}
                         >
                           Cancel

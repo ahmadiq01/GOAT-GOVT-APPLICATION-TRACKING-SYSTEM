@@ -138,15 +138,15 @@ const AdminDashboardWrapper = () => {
   const [recentApplications, setRecentApplications] = useState(mockRecentApplications);
 
   const handleViewApplications = () => {
-    navigate('/admin/applications');
+    navigate('/app/admin/applications');
   };
 
   const handleViewApplication = (applicationId) => {
-    navigate(`/admin/applications/${applicationId}`);
+    navigate(`/app/admin/applications/${applicationId}`);
   };
 
   const handleProcessApplication = (applicationId) => {
-    navigate(`/admin/applications/${applicationId}/process`);
+    navigate(`/app/admin/applications/${applicationId}/process`);
   };
 
   const getUrgencyColor = (days) => {
@@ -419,7 +419,7 @@ const AdminDashboardWrapper = () => {
                   fullWidth
                   variant="outlined"
                   startIcon={<NotificationsIcon />}
-                  onClick={() => navigate('/admin/feedback')}
+                  onClick={() => navigate('/app/admin/feedback')}
                 >
                   Manage Feedback
                 </Button>
@@ -427,7 +427,7 @@ const AdminDashboardWrapper = () => {
                   fullWidth
                   variant="outlined"
                   startIcon={<TrendingUpIcon />}
-                  onClick={() => navigate('/admin/processing')}
+                  onClick={() => navigate('/app/admin/processing')}
                 >
                   View Processing Queue
                 </Button>

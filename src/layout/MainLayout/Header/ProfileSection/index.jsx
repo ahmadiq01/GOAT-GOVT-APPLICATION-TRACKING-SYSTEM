@@ -75,8 +75,8 @@ export default function ProfileSection() {
     
     // Optionally clear any other session data
 
-    // Redirect to login page
-    navigate('/login');
+    // Redirect to root page (register-user)
+    navigate('/');
   };
 
   return (
@@ -135,7 +135,7 @@ export default function ProfileSection() {
             <Transitions in={open} {...TransitionProps}>
               <Paper>
                 {open && (
-                  <MainCard border={false} elevation={16} content={false} boxShadow shadow={theme.shadows[16]}>
+                  <MainCard border={false} elevation={16} content={false} boxShadow={theme.shadows[16]}>
                     <Box sx={{ p: 2, pb: 0 }}>
                       {/* <Stack>
                         <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>

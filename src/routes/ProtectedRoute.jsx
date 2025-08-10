@@ -49,8 +49,8 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    // If not authenticated, redirect to the login page
-    return <Navigate to="/login" />;
+    // If not authenticated, redirect to the root page (register-user)
+    return <Navigate to="/" />;
   }
 
   return children; // If authenticated, render the protected content

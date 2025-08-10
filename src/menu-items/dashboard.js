@@ -60,7 +60,7 @@ const menuItems = [
     id: 'super-admin-dashboard',
     title: 'Super Admin Dashboard',
     type: 'item',
-    url: '/super-admin/dashboard',
+    url: '/app/super-admin/dashboard',
     icon: icons.IconDashboard,
     breadcrumbs: false,
     roles: ['SuperAdmin']
@@ -69,7 +69,7 @@ const menuItems = [
     id: 'user-management',
     title: 'User Management',
     type: 'item',
-    url: '/super-admin/user-management',
+    url: '/app/super-admin/user-management',
     icon: icons.IconUsers,
     breadcrumbs: false,
     roles: ['SuperAdmin']
@@ -78,7 +78,7 @@ const menuItems = [
     id: 'application-management',
     title: 'Application Management',
     type: 'item',
-    url: '/super-admin/applications',
+    url: '/app/super-admin/applications',
     icon: icons.IconClipboardList,
     breadcrumbs: false,
     roles: ['SuperAdmin']
@@ -87,7 +87,7 @@ const menuItems = [
     id: 'notification-center',
     title: 'Notification Center',
     type: 'item',
-    url: '/super-admin/notifications',
+    url: '/app/super-admin/notifications',
     icon: icons.IconBell,
     breadcrumbs: false,
     roles: ['SuperAdmin']
@@ -97,7 +97,7 @@ const menuItems = [
     id: 'admin-dashboard',
     title: 'Admin Dashboard',
     type: 'item',
-    url: '/admin/dashboard',
+    url: '/app/admin/dashboard',
     icon: icons.IconDashboard,
     breadcrumbs: false,
     roles: ['Admin']
@@ -106,7 +106,7 @@ const menuItems = [
     id: 'received-applications',
     title: 'Received Applications',
     type: 'item',
-    url: '/admin/applications',
+    url: '/app/admin/applications',
     icon: icons.IconFileDescription,
     breadcrumbs: false,
     roles: ['Admin']
@@ -115,7 +115,7 @@ const menuItems = [
     id: 'application-processing',
     title: 'Application Processing',
     type: 'item',
-    url: '/admin/processing',
+    url: '/app/admin/processing',
     icon: icons.IconChecklist,
     breadcrumbs: false,
     roles: ['Admin']
@@ -124,7 +124,7 @@ const menuItems = [
     id: 'feedback-management',
     title: 'Feedback Management',
     type: 'item',
-    url: '/admin/feedback',
+    url: '/app/admin/feedback',
     icon: icons.IconMessageCircle,
     breadcrumbs: false,
     roles: ['Admin']

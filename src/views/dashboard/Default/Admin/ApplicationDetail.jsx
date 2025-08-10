@@ -142,11 +142,11 @@ const ApplicationDetail = () => {
   }, [applicationId]);
 
   const handleBack = () => {
-    navigate('/admin/applications');
+    navigate('/app/admin/applications');
   };
 
   const handleProcessApplication = () => {
-    navigate(`/admin/applications/${applicationId}/process`);
+    navigate(`/app/admin/applications/${applicationId}/process`);
   };
 
   const handleSendFeedback = () => {
