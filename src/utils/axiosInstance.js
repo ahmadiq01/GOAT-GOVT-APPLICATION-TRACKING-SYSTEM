@@ -43,7 +43,7 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-// Method to make API calls with dynamic endpoint
+// Method to make API calls with dynamic endpoint (for user-specific endpoints)
 const makeRequest = (endpoint, method = 'GET', data = null) => {
   const dynamicURL = `/user/${endpoint}`;  // Dynamically append the endpoint to the base URL
   
@@ -54,4 +54,13 @@ const makeRequest = (endpoint, method = 'GET', data = null) => {
   });
 };
 
-export { axiosInstance, makeRequest };
+// Method to make direct API calls (for general endpoints like applications, officers, etc.)
+const makeDirectRequest = (endpoint, method = 'GET', data = null) => {
+  return axiosInstance({
+    url: endpoint,    // Use the endpoint directly without /user/ prefix
+    method: method,   // Default to GET method
+    data: data,       // Send data for POST/PUT requests
+  });
+};
+
+export { axiosInstance, makeRequest, makeDirectRequest };

@@ -30,7 +30,7 @@ export default function ApplicationManagement() {
   const fetchApplications = async () => {
     setLoading(true); // Start loading
     try {
-      const response = await axios.get('https://esim.codistan.org/api/applications/all');
+      const response = await axios.get('https://SAHOOLAT APP.codistan.org/api/applications/all');
       setApplications(response.data.data); // Assuming the API response has a 'data' field
     } catch (error) {
       console.error('Error fetching applications:', error);

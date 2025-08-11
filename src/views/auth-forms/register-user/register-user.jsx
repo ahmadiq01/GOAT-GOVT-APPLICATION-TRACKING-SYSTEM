@@ -19,7 +19,13 @@ import {
   Divider,
   CircularProgress,
   ToggleButton,
-  ToggleButtonGroup
+  ToggleButtonGroup,
+  Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText
 } from '@mui/material';
 import {
   AccountBalance as GovIcon,
@@ -30,7 +36,7 @@ import {
   PersonAdd as NewUserIcon,
   Person as ExistingUserIcon
 } from '@mui/icons-material';
-import { axiosInstance } from '../../../utils/axiosInstance';
+import { makeDirectRequest } from '../../../utils/axiosInstance';
 
 // Styled components for government styling with green theme
 const GovPaper = styled(Paper)(({ theme }) => ({
@@ -154,7 +160,7 @@ export default function ComplaintRegistrationForm() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
-  const [complaintDetails, setComplaintDetails] = useState('');
+  const [description, setDescription] = useState('');
   const [attachments, setAttachments] = useState([]);
   
   // New state for registration type
@@ -166,7 +172,12 @@ export default function ComplaintRegistrationForm() {
   const [selectedOfficer, setSelectedOfficer] = useState('');
   const [selectedApplicationType, setSelectedApplicationType] = useState('');
   const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+
+  // New state for confirmation dialog
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
 
   // Fetch officers and application types on component mount
   useEffect(() => {
@@ -176,15 +187,37 @@ export default function ComplaintRegistrationForm() {
       
       try {
         // Fetch officers
-        const officersResponse = await axiosInstance.get('/officers');
+        const officersResponse = await makeDirectRequest('officers', 'GET');
         setOfficers(officersResponse.data?.data || []);
         
         // Fetch application types
-        const applicationTypesResponse = await axiosInstance.get('/application-types');
+        const applicationTypesResponse = await makeDirectRequest('application-types', 'GET');
         setApplicationTypes(applicationTypesResponse.data?.data || []);
+        
+        // If no data is available, show a warning
+        if ((officersResponse.data?.data || []).length === 0) {
+          setApiError('Warning: No officers available. Please contact support.');
+        }
+        if ((applicationTypesResponse.data?.data || []).length === 0) {
+          setApiError('Warning: No application types available. Please contact support.');
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
-        setApiError('Failed to load form data. Please refresh the page.');
+        
+        // Provide more specific error messages
+        if (error.code === 'NETWORK_ERROR' || error.message.includes('Network Error')) {
+          setApiError('Network error: Unable to connect to the server. Please check your internet connection.');
+        } else if (error.response?.status === 404) {
+          setApiError('API endpoints not found. Please contact system administrator.');
+        } else if (error.response?.status === 500) {
+          setApiError('Server error: Please try again later or contact support.');
+        } else {
+          setApiError('Failed to load form data. Please refresh the page or contact support.');
+        }
+        
+        // Set empty arrays to prevent form from breaking
+        setOfficers([]);
+        setApplicationTypes([]);
       } finally {
         setLoading(false);
       }
@@ -210,20 +243,167 @@ export default function ComplaintRegistrationForm() {
     setAttachments(Array.from(e.target.files));
   };
 
-  const handleSubmit = (e) => {
+  const validateForm = () => {
+    // CNIC validation
+    if (!cnic) {
+      setApiError('CNIC is required');
+      return false;
+    }
+    
+    // CNIC format validation (00000-0000000-0)
+    const cnicRegex = /^\d{5}-\d{7}-\d{1}$/;
+    if (!cnicRegex.test(cnic)) {
+      setApiError('Please enter CNIC in correct format: 00000-0000000-0');
+      return false;
+    }
+    
+    if (registrationType === 'new') {
+      if (!name || !phone || !address) {
+        setApiError('Name, phone, and address are required for new registrations');
+        return false;
+      }
+      
+      // Phone validation
+      const phoneRegex = /^(\+92|0)?[3]\d{9}$/;
+      if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+        setApiError('Please enter a valid Pakistani mobile number');
+        return false;
+      }
+      
+      // Email validation (optional but if provided, should be valid)
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        setApiError('Please enter a valid email address');
+        return false;
+      }
+    }
+    
+    if (!selectedApplicationType) {
+      setApiError('Please select an application type');
+      return false;
+    }
+    if (!selectedOfficer) {
+      setApiError('Please select an officer');
+      return false;
+    }
+    if (!description || description.trim().length < 10) {
+      setApiError('Please provide a detailed description (at least 10 characters)');
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ 
-      registrationType,
-      name: registrationType === 'new' ? name : '', 
-      cnic, 
-      phone: registrationType === 'new' ? phone : '', 
-      email: registrationType === 'new' ? email : '', 
-      address: registrationType === 'new' ? address : '', 
-      complaintDetails, 
-      attachments,
-      selectedOfficer,
-      selectedApplicationType
-    });
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    // Show confirmation dialog instead of submitting immediately
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setConfirmDialogOpen(false);
+    setSubmitting(true);
+    setApiError('');
+    setSuccessMessage('');
+
+    try {
+      // Prepare the data according to the API structure
+      const applicationData = {
+        name: registrationType === 'new' ? name : 'Existing User',
+        cnic: cnic,
+        phone: registrationType === 'new' ? phone : 'N/A',
+        email: registrationType === 'new' ? email : 'N/A',
+        address: registrationType === 'new' ? address : 'N/A',
+        applicationType: selectedApplicationType,
+        officer: selectedOfficer,
+        description: description,
+        attachments: [] // For now, we'll handle file uploads separately
+      };
+
+      // Submit the application
+      const response = await makeDirectRequest('applications', 'POST', applicationData);
+      
+      if (response.status === 201 || response.status === 200) {
+        setSuccessMessage('Application submitted successfully! Your application ID is: ' + (response.data?.data?._id || 'N/A'));
+        
+        // Reset form
+        setName('');
+        setCnic('');
+        setPhone('');
+        setEmail('');
+        setAddress('');
+        setDescription('');
+        setAttachments([]);
+        setSelectedOfficer('');
+        setSelectedApplicationType('');
+        setRegistrationType('new');
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      if (error.response?.data?.message) {
+        setApiError(error.response.data.message);
+      } else if (error.message) {
+        setApiError(error.message);
+      } else {
+        setApiError('Failed to submit application. Please try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCloseConfirmDialog = () => {
+    setConfirmDialogOpen(false);
+  };
+
+  const handleCloseSnackbar = () => {
+    setSuccessMessage('');
+  };
+
+  // Helper function to format CNIC as user types
+  const formatCNIC = (value) => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, '');
+    
+    // Format as 00000-0000000-0
+    if (digits.length <= 5) {
+      return digits;
+    } else if (digits.length <= 12) {
+      return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+    } else {
+      return `${digits.slice(0, 5)}-${digits.slice(5, 12)}-${digits.slice(12, 13)}`;
+    }
+  };
+
+  // Helper function to format phone number
+  const formatPhone = (value) => {
+    // Remove all non-digits
+    const digits = value.replace(/\D/g, '');
+    
+    // If starts with 0, remove it
+    if (digits.startsWith('0')) {
+      return digits.slice(1);
+    }
+    
+    // If starts with 92, remove it
+    if (digits.startsWith('92')) {
+      return digits.slice(2);
+    }
+    
+    return digits;
+  };
+
+  const handleCNICChange = (e) => {
+    const formatted = formatCNIC(e.target.value);
+    setCnic(formatted);
+  };
+
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhone(e.target.value);
+    setPhone(formatted);
   };
 
   if (loading) {
@@ -276,7 +456,7 @@ export default function ComplaintRegistrationForm() {
             textShadow: '0 2px 4px rgba(0,0,0,0.3)',
             color: 'white'
           }}>
-            Public Complaint Registration System
+            Government Application Submission System
           </Typography>
           
           <Typography variant="body1" sx={{
@@ -286,14 +466,53 @@ export default function ComplaintRegistrationForm() {
             textShadow: '0 2px 4px rgba(0,0,0,0.3)',
             color: 'white'
           }}>
-            Submit your complaint online for prompt resolution by relevant authorities
+            Submit your government application online for prompt processing by relevant authorities
           </Typography>
         </HeaderBox>
 
         {/* API Error Alert */}
         {apiError && (
-          <Alert severity="error" sx={{ mb: 3, borderRadius: 1 }}>
+          <Alert 
+            severity="error" 
+            sx={{ mb: 3, borderRadius: 1 }} 
+            onClose={() => setApiError('')}
+            action={
+              <Button 
+                color="inherit" 
+                size="small" 
+                onClick={() => {
+                  setApiError('');
+                  // Retry fetching data
+                  const fetchData = async () => {
+                    setLoading(true);
+                    try {
+                      const officersResponse = await makeDirectRequest('officers', 'GET');
+                      setOfficers(officersResponse.data?.data || []);
+                      
+                      const applicationTypesResponse = await makeDirectRequest('application-types', 'GET');
+                      setApplicationTypes(applicationTypesResponse.data?.data || []);
+                    } catch (error) {
+                      console.error('Retry failed:', error);
+                      setApiError('Retry failed. Please check your connection and try again.');
+                    } finally {
+                      setLoading(false);
+                    }
+                  };
+                  fetchData();
+                }}
+              >
+                Retry
+              </Button>
+            }
+          >
             {apiError}
+          </Alert>
+        )}
+
+        {/* Success Message */}
+        {successMessage && (
+          <Alert severity="success" sx={{ mb: 3, borderRadius: 1 }} onClose={() => setSuccessMessage('')}>
+            {successMessage}
           </Alert>
         )}
 
@@ -309,7 +528,7 @@ export default function ComplaintRegistrationForm() {
               gap: 1
             }}>
               <ComplaintIcon />
-              Complaint Registration Form
+              Government Application Form
             </Typography>
             <Typography variant="body2" sx={{ color: '#666', mb: 2 }}>
               Please fill all required fields accurately
@@ -407,7 +626,7 @@ export default function ComplaintRegistrationForm() {
                       label="Mobile Number"
                       type="tel"
                       value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
+                      onChange={handlePhoneChange}
                       required
                       placeholder="+92-300-0000000"
                       variant="outlined"
@@ -463,7 +682,7 @@ export default function ComplaintRegistrationForm() {
                   fullWidth
                   label="CNIC Number"
                   value={cnic}
-                  onChange={(e) => setCnic(e.target.value)}
+                  onChange={handleCNICChange}
                   required
                   placeholder="00000-0000000-0"
                   variant="outlined"
@@ -471,7 +690,7 @@ export default function ComplaintRegistrationForm() {
                 />
               </Grid>
 
-              {/* Complaint Information Section */}
+              {/* Application Information Section */}
               <Grid item xs={12} sx={{ mt: 3 }}>
                 <Typography variant="h6" sx={{
                   fontWeight: 600,
@@ -480,7 +699,7 @@ export default function ComplaintRegistrationForm() {
                   pb: 1,
                   borderBottom: '2px solid #e0e0e0'
                 }}>
-                  Complaint Details
+                  Application Details
                 </Typography>
               </Grid>
 
@@ -526,18 +745,26 @@ export default function ComplaintRegistrationForm() {
                 </FormControl>
               </Grid>
 
-              {/* Complaint Details */}
+              {/* Application Description */}
               <Grid item xs={12}>
                 <GovTextField
                   fullWidth
-                  label="Detailed Complaint Description"
-                  value={complaintDetails}
-                  onChange={(e) => setComplaintDetails(e.target.value)}
+                  label="Application Description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   required
-                  placeholder="Please provide detailed information about your complaint including date, time, location, and any other relevant details..."
+                  placeholder="Please provide detailed information about your application including purpose, requirements, and any other relevant details..."
                   variant="outlined"
                   multiline
                   rows={6}
+                  inputProps={{ maxLength: 1000 }}
+                  helperText={`${description.length}/1000 characters`}
+                  FormHelperTextProps={{
+                    sx: {
+                      color: description.length > 900 ? '#f57c00' : '#666',
+                      fontWeight: description.length > 900 ? 600 : 400
+                    }
+                  }}
                 />
               </Grid>
 
@@ -626,12 +853,79 @@ export default function ComplaintRegistrationForm() {
                 )}
               </Grid>
 
+              {/* Application Summary */}
+              <Grid item xs={12}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 600,
+                  color: '#424242',
+                  mb: 2,
+                  pb: 1,
+                  borderBottom: '2px solid #e0e0e0'
+                }}>
+                  Application Summary
+                </Typography>
+                
+                <Box sx={{
+                  bgcolor: '#f8f9fa',
+                  p: 3,
+                  borderRadius: 2,
+                  border: '1px solid #e9ecef'
+                }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
+                        <strong>Applicant Name:</strong>
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#424242', mb: 2 }}>
+                        {registrationType === 'new' ? (name || 'Not provided') : 'Existing User'}
+                      </Typography>
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
+                        <strong>CNIC:</strong>
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#424242', mb: 2 }}>
+                        {cnic || 'Not provided'}
+                      </Typography>
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
+                        <strong>Application Type:</strong>
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#424242', mb: 2 }}>
+                        {applicationTypes.find(t => t._id === selectedApplicationType)?.name || 'Not selected'}
+                      </Typography>
+                    </Grid>
+                    
+                    <Grid item xs={12} md={6}>
+                      <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
+                        <strong>Assigned Officer:</strong>
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#424242', mb: 2 }}>
+                        {officers.find(o => o._id === selectedOfficer)?.name || 'Not selected'}
+                      </Typography>
+                    </Grid>
+                    
+                    <Grid item xs={12}>
+                      <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
+                        <strong>Description:</strong>
+                      </Typography>
+                      <Typography variant="body2" sx={{ color: '#424242' }}>
+                        {description || 'Not provided'}
+                      </Typography>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Grid>
+
               {/* Terms and Submit */}
               <Grid item xs={12}>
                 <Alert severity="warning" sx={{ mb: 3, borderRadius: 1 }}>
                   <Typography variant="body2">
                     <strong>Important:</strong> Providing false information is a punishable offense. 
-                    Your complaint will be forwarded to the relevant department for investigation and resolution.
+                    Your application will be forwarded to the relevant department for processing and approval.
                   </Typography>
                 </Alert>
 
@@ -639,15 +933,117 @@ export default function ComplaintRegistrationForm() {
                   type="submit"
                   fullWidth
                   size="large"
-                  startIcon={<SendIcon />}
+                  startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+                  disabled={submitting}
                   sx={{ py: 2 }}
                 >
-                  Submit Complaint
+                  {submitting ? 'Submitting Application...' : 'Submit Application'}
                 </GovButton>
               </Grid>
             </Grid>
           </Box>
         </GovPaper>
+
+        {/* Confirmation Dialog */}
+        <Dialog
+          open={confirmDialogOpen}
+          onClose={handleCloseConfirmDialog}
+          aria-labelledby="confirm-dialog-title"
+          aria-describedby="confirm-dialog-description"
+          PaperProps={{
+            sx: {
+              borderRadius: 2,
+              border: '2px solid #00ce5a',
+              minWidth: 400
+            }
+          }}
+        >
+          <DialogTitle 
+            id="confirm-dialog-title"
+            sx={{
+              bgcolor: '#013f1b',
+              color: 'white',
+              textAlign: 'center',
+              '& .MuiTypography-root': {
+                fontWeight: 600
+              }
+            }}
+          >
+            Confirm Application Submission
+          </DialogTitle>
+          <DialogContent sx={{ pt: 3 }}>
+            <DialogContentText id="confirm-dialog-description" sx={{ mb: 2 }}>
+              Please review your application details before submitting. This action cannot be undone.
+            </DialogContentText>
+            
+            <Box sx={{
+              bgcolor: '#f8f9fa',
+              p: 2,
+              borderRadius: 1,
+              border: '1px solid #e9ecef'
+            }}>
+              <Typography variant="subtitle2" sx={{ color: '#666', mb: 1 }}>
+                <strong>Application Summary:</strong>
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
+                <strong>Name:</strong> {registrationType === 'new' ? (name || 'Not provided') : 'Existing User'}
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
+                <strong>CNIC:</strong> {cnic || 'Not provided'}
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
+                <strong>Type:</strong> {applicationTypes.find(t => t._id === selectedApplicationType)?.name || 'Not selected'}
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#424242' }}>
+                <strong>Officer:</strong> {officers.find(o => o._id === selectedOfficer)?.name || 'Not selected'}
+              </Typography>
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ p: 3, pt: 1 }}>
+            <Button 
+              onClick={handleCloseConfirmDialog} 
+              variant="outlined"
+              sx={{
+                borderColor: '#00ce5a',
+                color: '#00ce5a',
+                '&:hover': {
+                  borderColor: '#00a047',
+                  bgcolor: '#e8f8f0'
+                }
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleConfirmSubmit} 
+              variant="contained" 
+              disabled={submitting}
+              sx={{
+                bgcolor: '#00ce5a',
+                '&:hover': {
+                  bgcolor: '#00a047'
+                },
+                '&:disabled': {
+                  bgcolor: '#ccc'
+                }
+              }}
+            >
+              {submitting ? <CircularProgress size={24} color="inherit" /> : 'Submit Application'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Success Snackbar */}
+        <Snackbar
+          open={!!successMessage}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        >
+          <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+            {successMessage}
+          </Alert>
+        </Snackbar>
 
       </Container>
     </Box>
