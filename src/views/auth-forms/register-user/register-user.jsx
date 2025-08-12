@@ -25,7 +25,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  DialogContentText
+  DialogContentText,
+  LinearProgress
 } from '@mui/material';
 import {
   AccountBalance as GovIcon,
@@ -34,7 +35,9 @@ import {
   Description as DescriptionIcon,
   Warning as ComplaintIcon,
   PersonAdd as NewUserIcon,
-  Person as ExistingUserIcon
+  Person as ExistingUserIcon,
+  Delete as DeleteIcon,
+  CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import { makeDirectRequest } from '../../../utils/axiosInstance';
 
@@ -92,17 +95,18 @@ const GovSelect = styled(Select)(({ theme }) => ({
   }
 }));
 
-const UploadArea = styled(Box)(({ theme }) => ({
+const UploadArea = styled(Box)(({ theme, uploading }) => ({
   border: `2px dashed #00ce5a`,
   borderRadius: theme.spacing(0.5),
   padding: theme.spacing(4),
   textAlign: 'center',
-  cursor: 'pointer',
+  cursor: uploading ? 'not-allowed' : 'pointer',
   transition: 'all 0.2s ease',
-  backgroundColor: '#ffffff',
+  backgroundColor: uploading ? '#f5f5f5' : '#ffffff',
+  opacity: uploading ? 0.7 : 1,
   '&:hover': {
-    borderColor: '#00a047',
-    backgroundColor: '#e8f8f0',
+    borderColor: uploading ? '#00ce5a' : '#00a047',
+    backgroundColor: uploading ? '#f5f5f5' : '#e8f8f0',
   }
 }));
 
@@ -176,8 +180,17 @@ export default function ComplaintRegistrationForm() {
   const [apiError, setApiError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
 
+  // New state for file upload
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+
   // New state for confirmation dialog
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+
+  // File validation constants
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+  const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+  const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'];
 
   // Fetch officers and application types on component mount
   useEffect(() => {
@@ -239,8 +252,110 @@ export default function ComplaintRegistrationForm() {
     }
   };
 
-  const handleFileChange = (e) => {
-    setAttachments(Array.from(e.target.files));
+  // File validation function
+  const validateFile = (file) => {
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      return `File "${file.name}" is too large. Maximum size allowed is 5MB.`;
+    }
+
+    // Check file type
+    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+    if (!ALLOWED_FILE_TYPES.includes(file.type) && !ALLOWED_EXTENSIONS.includes(fileExtension)) {
+      return `File "${file.name}" has an unsupported format. Allowed formats: PDF, JPG, PNG, DOC, DOCX.`;
+    }
+
+    return null; // File is valid
+  };
+
+  // Upload files to S3
+  const uploadFiles = async (files) => {
+    const formData = new FormData();
+    
+    // Append all files to FormData
+    Array.from(files).forEach(file => {
+      formData.append('files', file);
+    });
+
+    try {
+      const response = await fetch('https://goat-govt-application-tracking-system-backend-production.up.railway.app/api/files/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Upload failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success && result.data?.files) {
+        return result.data.files.map(file => ({
+          id: file.id,
+          url: file.url,
+          originalName: file.originalName,
+          mimeType: file.mimeType,
+          size: file.size,
+          uploadDate: file.uploadDate
+        }));
+      } else {
+        throw new Error('Upload response format is invalid');
+      }
+    } catch (error) {
+      console.error('File upload error:', error);
+      throw error;
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    
+    if (selectedFiles.length === 0) return;
+
+    // Validate all files first
+    const validationErrors = [];
+    selectedFiles.forEach(file => {
+      const error = validateFile(file);
+      if (error) {
+        validationErrors.push(error);
+      }
+    });
+
+    if (validationErrors.length > 0) {
+      setUploadError(validationErrors.join(' '));
+      return;
+    }
+
+    // Check total files limit (optional - you can adjust this)
+    if (attachments.length + selectedFiles.length > 10) {
+      setUploadError('Maximum 10 files allowed per application.');
+      return;
+    }
+
+    setUploading(true);
+    setUploadError('');
+
+    try {
+      const uploadedFiles = await uploadFiles(selectedFiles);
+      
+      // Add uploaded files to attachments
+      setAttachments(prev => [...prev, ...uploadedFiles]);
+      
+      // Show success message
+      setSuccessMessage(`Successfully uploaded ${uploadedFiles.length} file(s).`);
+      
+    } catch (error) {
+      setUploadError(`Failed to upload files: ${error.message}`);
+    } finally {
+      setUploading(false);
+      // Clear the file input
+      e.target.value = '';
+    }
+  };
+
+  // Remove uploaded file
+  const handleRemoveFile = (index) => {
+    setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
   const validateForm = () => {
@@ -320,7 +435,7 @@ export default function ComplaintRegistrationForm() {
         applicationType: selectedApplicationType,
         officer: selectedOfficer,
         description: description,
-        attachments: [] // For now, we'll handle file uploads separately
+        attachments: attachments.map(file => file.url) // Send URLs of uploaded files
       };
 
       // Submit the application
@@ -361,6 +476,10 @@ export default function ComplaintRegistrationForm() {
 
   const handleCloseSnackbar = () => {
     setSuccessMessage('');
+  };
+
+  const handleCloseUploadError = () => {
+    setUploadError('');
   };
 
   // Helper function to format CNIC as user types
@@ -404,6 +523,15 @@ export default function ComplaintRegistrationForm() {
   const handlePhoneChange = (e) => {
     const formatted = formatPhone(e.target.value);
     setPhone(formatted);
+  };
+
+  // Helper function to format file size
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
   if (loading) {
@@ -785,27 +913,32 @@ export default function ComplaintRegistrationForm() {
                   onChange={handleFileChange}
                   style={{ display: 'none' }}
                   id="file-upload"
+                  disabled={uploading}
                 />
                 
                 <label htmlFor="file-upload">
-                  <UploadArea>
+                  <UploadArea uploading={uploading}>
                     <Avatar sx={{
                       width: 56,
                       height: 56,
-                      bgcolor: '#e8f8f0',
-                      color: '#00ce5a',
+                      bgcolor: uploading ? '#f0f0f0' : '#e8f8f0',
+                      color: uploading ? '#999' : '#00ce5a',
                       mx: 'auto',
                       mb: 2
                     }}>
-                      <CloudUploadIcon sx={{ fontSize: 28 }} />
+                      {uploading ? (
+                        <CircularProgress size={28} sx={{ color: '#00ce5a' }} />
+                      ) : (
+                        <CloudUploadIcon sx={{ fontSize: 28 }} />
+                      )}
                     </Avatar>
                     
-                    <Typography variant="h6" sx={{ mb: 1, color: '#424242' }}>
-                      Upload Supporting Documents
+                    <Typography variant="h6" sx={{ mb: 1, color: uploading ? '#999' : '#424242' }}>
+                      {uploading ? 'Uploading Files...' : 'Upload Supporting Documents'}
                     </Typography>
                     
-                    <Typography variant="body2" sx={{ color: '#666', mb: 1 }}>
-                      Click to select files or drag and drop here
+                    <Typography variant="body2" sx={{ color: uploading ? '#999' : '#666', mb: 1 }}>
+                      {uploading ? 'Please wait while files are being uploaded' : 'Click to select files or drag and drop here'}
                     </Typography>
                     
                     <Typography variant="caption" sx={{ color: '#999' }}>
@@ -814,9 +947,29 @@ export default function ComplaintRegistrationForm() {
                   </UploadArea>
                 </label>
 
+                {/* Upload Progress */}
+                {uploading && (
+                  <Box sx={{ mt: 2 }}>
+                    <LinearProgress 
+                      sx={{ 
+                        height: 8, 
+                        borderRadius: 4,
+                        bgcolor: '#f0f0f0',
+                        '& .MuiLinearProgress-bar': {
+                          bgcolor: '#00ce5a'
+                        }
+                      }} 
+                    />
+                    <Typography variant="body2" sx={{ mt: 1, textAlign: 'center', color: '#666' }}>
+                      Uploading files to secure server...
+                    </Typography>
+                  </Box>
+                )}
+
+                {/* Uploaded Files Display */}
                 {attachments.length > 0 && (
                   <Alert 
-                    severity="info" 
+                    severity="success" 
                     sx={{ 
                       mt: 2, 
                       borderRadius: 1,
@@ -827,26 +980,45 @@ export default function ComplaintRegistrationForm() {
                       }
                     }}
                   >
-                    <Typography variant="subtitle2" sx={{ mb: 1, color: '#00a047' }}>
-                      Attached Documents ({attachments.length}):
+                    <Typography variant="subtitle2" sx={{ mb: 1, color: '#00a047', display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <CheckCircleIcon sx={{ fontSize: 18 }} />
+                      Successfully Uploaded Documents ({attachments.length}):
                     </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                       {attachments.map((file, idx) => (
-                        <Chip
+                        <Box 
                           key={idx}
-                          label={file.name}
-                          icon={<DescriptionIcon />}
-                          variant="outlined"
-                          size="small"
-                          sx={{ 
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
                             bgcolor: 'white',
-                            borderColor: '#00ce5a',
-                            color: '#00a047',
-                            '& .MuiChip-icon': {
-                              color: '#00ce5a'
-                            }
+                            p: 2,
+                            borderRadius: 1,
+                            border: '1px solid #e0e0e0'
                           }}
-                        />
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flex: 1 }}>
+                            <DescriptionIcon sx={{ color: '#00ce5a', fontSize: 20 }} />
+                            <Box>
+                              <Typography variant="body2" sx={{ fontWeight: 500, color: '#424242' }}>
+                                {file.originalName}
+                              </Typography>
+                              <Typography variant="caption" sx={{ color: '#666' }}>
+                                {formatFileSize(file.size)} • {file.mimeType}
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <Button
+                            size="small"
+                            color="error"
+                            onClick={() => handleRemoveFile(idx)}
+                            startIcon={<DeleteIcon />}
+                            sx={{ minWidth: 'auto', p: 1 }}
+                          >
+                            Remove
+                          </Button>
+                        </Box>
                       ))}
                     </Box>
                   </Alert>
@@ -912,10 +1084,21 @@ export default function ComplaintRegistrationForm() {
                       <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
                         <strong>Description:</strong>
                       </Typography>
-                      <Typography variant="body2" sx={{ color: '#424242' }}>
+                      <Typography variant="body2" sx={{ color: '#424242', mb: 2 }}>
                         {description || 'Not provided'}
                       </Typography>
                     </Grid>
+
+                    {attachments.length > 0 && (
+                      <Grid item xs={12}>
+                        <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
+                          <strong>Attached Documents:</strong>
+                        </Typography>
+                        <Typography variant="body2" sx={{ color: '#424242' }}>
+                          {attachments.length} file(s) uploaded successfully
+                        </Typography>
+                      </Grid>
+                    )}
                   </Grid>
                 </Box>
               </Grid>
@@ -934,10 +1117,10 @@ export default function ComplaintRegistrationForm() {
                   fullWidth
                   size="large"
                   startIcon={submitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
-                  disabled={submitting}
+                  disabled={submitting || uploading}
                   sx={{ py: 2 }}
                 >
-                  {submitting ? 'Submitting Application...' : 'Submit Application'}
+                  {submitting ? 'Submitting Application...' : uploading ? 'Please wait - Files uploading...' : 'Submit Application'}
                 </GovButton>
               </Grid>
             </Grid>
@@ -994,9 +1177,14 @@ export default function ComplaintRegistrationForm() {
               <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
                 <strong>Type:</strong> {applicationTypes.find(t => t._id === selectedApplicationType)?.name || 'Not selected'}
               </Typography>
-              <Typography variant="body2" sx={{ color: '#424242' }}>
+              <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
                 <strong>Officer:</strong> {officers.find(o => o._id === selectedOfficer)?.name || 'Not selected'}
               </Typography>
+              {attachments.length > 0 && (
+                <Typography variant="body2" sx={{ color: '#424242' }}>
+                  <strong>Documents:</strong> {attachments.length} file(s) attached
+                </Typography>
+              )}
             </Box>
           </DialogContent>
           <DialogActions sx={{ p: 3, pt: 1 }}>
@@ -1042,6 +1230,18 @@ export default function ComplaintRegistrationForm() {
         >
           <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
             {successMessage}
+          </Alert>
+        </Snackbar>
+
+        {/* Upload Error Snackbar */}
+        <Snackbar
+          open={!!uploadError}
+          autoHideDuration={8000}
+          onClose={handleCloseUploadError}
+          anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        >
+          <Alert onClose={handleCloseUploadError} severity="error" sx={{ width: '100%' }}>
+            {uploadError}
           </Alert>
         </Snackbar>
 
