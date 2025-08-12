@@ -291,12 +291,12 @@ export default function ComplaintRegistrationForm() {
       
       if (result.success && result.data?.files) {
         return result.data.files.map(file => ({
-          id: file.id,
-          url: file.url,
+          id: file.id || Math.random().toString(36).substr(2, 9),
+          url: file.s3Url, // Use s3Url from the response
           originalName: file.originalName,
-          mimeType: file.mimeType,
+          mimeType: file.mimetype, // Use mimetype from the response
           size: file.size,
-          uploadDate: file.uploadDate
+          uploadDate: file.uploadDate || new Date().toISOString()
         }));
       } else {
         throw new Error('Upload response format is invalid');
