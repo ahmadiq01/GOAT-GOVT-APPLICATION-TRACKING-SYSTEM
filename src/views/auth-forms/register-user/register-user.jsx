@@ -37,8 +37,7 @@ import {
   PersonAdd as NewUserIcon,
   Person as ExistingUserIcon,
   Delete as DeleteIcon,
-  CheckCircle as CheckCircleIcon,
-  GetApp as DownloadIcon
+  CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import { makeDirectRequest } from '../../../utils/axiosInstance';
 import { generateAndDownloadPDF, generateAndDownloadPDFAlternative } from '../../../utils/pdfGenerator';
@@ -159,21 +158,6 @@ const GovToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
   }
 }));
 
-const DownloadButton = styled(Button)(({ theme }) => ({
-  background: 'linear-gradient(45deg, #1976d2, #1565c0)',
-  borderRadius: theme.spacing(0.5),
-  padding: theme.spacing(1, 3),
-  fontSize: '0.9rem',
-  fontWeight: 600,
-  textTransform: 'uppercase',
-  letterSpacing: '0.5px',
-  boxShadow: '0 4px 12px rgba(25, 118, 210, 0.3)',
-  '&:hover': {
-    background: 'linear-gradient(45deg, #1565c0, #0d47a1)',
-    boxShadow: '0 6px 16px rgba(25, 118, 210, 0.4)',
-  }
-}));
-
 export default function ComplaintRegistrationForm() {
   const theme = useTheme();
   const [name, setName] = useState('');
@@ -203,37 +187,11 @@ export default function ComplaintRegistrationForm() {
 
   // New state for confirmation dialog
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
-  
-  // New state for PDF generation
-  const [lastSubmittedApplication, setLastSubmittedApplication] = useState(null);
-  const [showDownloadButton, setShowDownloadButton] = useState(false);
 
   // File validation constants
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
   const ALLOWED_FILE_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
   const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx'];
-
-  // Test browser download capability
-  const testBrowserDownload = () => {
-    try {
-      console.log('Testing browser download capability...');
-      const testContent = "This is a test file for download capability";
-      const blob = new Blob([testContent], { type: 'text/plain' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'test_download.txt';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      console.log('Browser download test completed successfully');
-      return true;
-    } catch (error) {
-      console.error('Browser download test failed:', error);
-      return false;
-    }
-  };
 
   // Fetch officers and application types on component mount
   useEffect(() => {
@@ -261,9 +219,6 @@ export default function ComplaintRegistrationForm() {
         if ((applicationTypesResponse.data?.data || []).length === 0) {
           setApiError('Warning: No application types available. Please contact support.');
         }
-
-        // Test browser download capability on load
-        testBrowserDownload();
         
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -474,7 +429,6 @@ export default function ComplaintRegistrationForm() {
     setSubmitting(true);
     setApiError('');
     setSuccessMessage('');
-    setShowDownloadButton(false);
 
     try {
       // Prepare the data according to the API structure
@@ -499,13 +453,16 @@ export default function ComplaintRegistrationForm() {
       if (response.status === 201 || response.status === 200) {
         const submittedApplication = response.data?.data;
         const applicationId = submittedApplication?._id || 'N/A';
+        const trackingNumber = submittedApplication?.trackingNumber || 'N/A';
         
         console.log('Application submitted successfully with ID:', applicationId);
+        console.log('Tracking Number:', trackingNumber);
         
         // Store the submitted application data for PDF generation
         const applicationForPDF = {
           ...applicationData,
           _id: applicationId,
+          trackingNumber: trackingNumber,
           attachments: attachments // Pass the full attachment objects for PDF generation
         };
         
@@ -513,20 +470,16 @@ export default function ComplaintRegistrationForm() {
         console.log('Officers available for PDF:', officers);
         console.log('Application types available for PDF:', applicationTypes);
         
-        setLastSubmittedApplication(applicationForPDF);
-        
         // Validate required data for PDF generation
         if (!officers || officers.length === 0) {
           console.error('Officers data not available for PDF generation');
-          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId}. (Officers data not available for PDF generation)`);
-          setShowDownloadButton(true);
+          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${trackingNumber}.`);
           return;
         }
         
         if (!applicationTypes || applicationTypes.length === 0) {
           console.error('Application types data not available for PDF generation');
-          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId}. (Application types data not available for PDF generation)`);
-          setShowDownloadButton(true);
+          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${trackingNumber}.`);
           return;
         }
         
@@ -555,17 +508,14 @@ export default function ComplaintRegistrationForm() {
           }
           
           if (pdfResult.success) {
-            setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId}. PDF receipt has been downloaded automatically.`);
-            setShowDownloadButton(true); // Always show button as backup
+            setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${trackingNumber}. PDF receipt has been downloaded automatically.`);
           } else {
             console.error('Both PDF generation methods failed:', pdfResult.error);
-            setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId}. (PDF generation failed: ${pdfResult.error})`);
-            setShowDownloadButton(true);
+            setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${trackingNumber}.`);
           }
         } catch (pdfError) {
           console.error('PDF generation error:', pdfError);
-          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId}. (PDF generation failed: ${pdfError.message})`);
-          setShowDownloadButton(true);
+          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${trackingNumber}.`);
         }
         
         // Reset form
@@ -604,50 +554,6 @@ export default function ComplaintRegistrationForm() {
 
   const handleCloseUploadError = () => {
     setUploadError('');
-  };
-
-  // Function to handle manual PDF download
-  const handleManualPDFDownload = () => {
-    if (!lastSubmittedApplication) {
-      setApiError('No application data available for PDF generation');
-      return;
-    }
-
-    console.log('Manual PDF download triggered');
-    console.log('Application data:', lastSubmittedApplication);
-    console.log('Officers:', officers);
-    console.log('Application types:', applicationTypes);
-
-    try {
-      // Try alternative method first
-      let pdfResult = generateAndDownloadPDFAlternative(
-        lastSubmittedApplication,
-        officers,
-        applicationTypes
-      );
-      
-      console.log('Manual PDF result (alternative):', pdfResult);
-      
-      // If alternative fails, try the original method
-      if (!pdfResult.success) {
-        console.log('Alternative failed, trying original method...');
-        pdfResult = generateAndDownloadPDF(
-          lastSubmittedApplication,
-          officers,
-          applicationTypes
-        );
-        console.log('Manual PDF result (original):', pdfResult);
-      }
-      
-      if (pdfResult.success) {
-        setSuccessMessage('PDF receipt downloaded successfully!');
-      } else {
-        setApiError('Failed to generate PDF: ' + pdfResult.error);
-      }
-    } catch (error) {
-      console.error('Manual PDF download error:', error);
-      setApiError('Failed to generate PDF. Please try again. Error: ' + error.message);
-    }
   };
 
   // Helper function to format CNIC as user types
@@ -811,42 +717,9 @@ export default function ComplaintRegistrationForm() {
             severity="success" 
             sx={{ mb: 3, borderRadius: 1 }} 
             onClose={() => setSuccessMessage('')}
-            action={
-              showDownloadButton && (
-                <DownloadButton
-                  color="inherit"
-                  size="small"
-                  onClick={handleManualPDFDownload}
-                  startIcon={<DownloadIcon />}
-                  sx={{
-                    color: 'white',
-                    minWidth: 'auto',
-                    '&:hover': {
-                      backgroundColor: 'rgba(255,255,255,0.1)'
-                    }
-                  }}
-                >
-                  Download PDF Receipt
-                </DownloadButton>
-              )
-            }
           >
             {successMessage}
           </Alert>
-        )}
-
-        {/* Standalone Download Button for completed applications */}
-        {showDownloadButton && lastSubmittedApplication && (
-          <Box sx={{ mb: 3, textAlign: 'center' }}>
-            <DownloadButton
-              onClick={handleManualPDFDownload}
-              startIcon={<DownloadIcon />}
-              size="large"
-              sx={{ py: 2, px: 4 }}
-            >
-              Download PDF Receipt
-            </DownloadButton>
-          </Box>
         )}
 
         {/* Form Card */}

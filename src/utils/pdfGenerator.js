@@ -212,9 +212,10 @@ export const generateApplicationPDF = (applicationData, officers, applicationTyp
     // Add government header
     let currentY = addGovernmentHeader(doc, 'Application Submission Receipt');
     
-    // Add application ID and date
+    // Add application ID, tracking number and date
     currentY = addSectionHeader(doc, 'Application Information', currentY);
     currentY = addField(doc, 'Application ID', applicationData._id || 'Pending', 20, currentY);
+    currentY = addField(doc, 'Tracking Number', applicationData.trackingNumber || 'Pending', 20, currentY);
     currentY = addField(doc, 'Submission Date', new Date().toLocaleDateString('en-GB'), 20, currentY);
     currentY = addField(doc, 'Application Type', applicationType?.name || 'Not selected', 20, currentY);
     currentY = addField(doc, 'Assigned Officer', officer ? `${officer.name} - ${officer.designation}` : 'Not assigned', 20, currentY);
@@ -264,7 +265,8 @@ export const generateAndDownloadPDF = (applicationData, officers, applicationTyp
     // Generate filename
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const applicantName = applicationData.name ? applicationData.name.replace(/\s+/g, '_') : 'Application';
-    const filename = `Government_Application_${applicantName}_${timestamp}.pdf`;
+    const trackingNumber = applicationData.trackingNumber ? applicationData.trackingNumber.replace(/\s+/g, '_') : timestamp;
+    const filename = `Government_Application_${applicantName}_${trackingNumber}.pdf`;
     
     console.log('Attempting to download PDF with filename:', filename);
     
@@ -296,7 +298,8 @@ export const generateAndDownloadPDFAlternative = (applicationData, officers, app
     // Generate filename
     const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const applicantName = applicationData.name ? applicationData.name.replace(/\s+/g, '_') : 'Application';
-    const filename = `Government_Application_${applicantName}_${timestamp}.pdf`;
+    const trackingNumber = applicationData.trackingNumber ? applicationData.trackingNumber.replace(/\s+/g, '_') : timestamp;
+    const filename = `Government_Application_${applicantName}_${trackingNumber}.pdf`;
     
     console.log('Attempting to download PDF with filename (alternative method):', filename);
     
@@ -382,43 +385,6 @@ export const generatePDFDataURL = (applicationData, officers, applicationTypes) 
       success: false,
       error: error.message,
       message: 'Failed to generate PDF data URL'
-    };
-  }
-};
-
-// Function to test browser download capability
-export const testBrowserDownloadCapability = () => {
-  try {
-    console.log('Testing browser download capability...');
-    
-    // Create a simple test file
-    const testContent = "Test download - Government Application System";
-    const blob = new Blob([testContent], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'test_download.txt';
-    link.style.display = 'none';
-    
-    document.body.appendChild(link);
-    link.click();
-    
-    setTimeout(() => {
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    }, 100);
-    
-    console.log('Browser download test completed successfully');
-    return {
-      success: true,
-      message: 'Browser supports downloads'
-    };
-  } catch (error) {
-    console.error('Browser download test failed:', error);
-    return {
-      success: false,
-      error: error.message,
-      message: 'Browser may not support automatic downloads'
     };
   }
 };
