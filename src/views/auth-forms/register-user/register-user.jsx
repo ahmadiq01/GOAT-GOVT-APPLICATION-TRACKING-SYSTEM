@@ -171,7 +171,7 @@ export default function ComplaintRegistrationForm() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [cnic, setCnic] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('+92-03');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
   const [description, setDescription] = useState('');
@@ -260,7 +260,7 @@ export default function ComplaintRegistrationForm() {
       // Clear form fields when switching registration type
       if (newRegistrationType === 'existing') {
         setName('');
-        setPhone('');
+        setPhone('+92-03');
         setEmail('');
         setAddress('');
       }
@@ -373,6 +373,38 @@ export default function ComplaintRegistrationForm() {
     setAttachments(prev => prev.filter((_, i) => i !== index));
   };
 
+  // FIXED: Updated phone validation function
+  const validatePhoneNumber = (phone) => {
+    // Remove all non-digits
+    const digits = phone.replace(/\D/g, '');
+    
+    console.log('Validating phone:', phone);
+    console.log('Extracted digits:', digits);
+    
+    // Pakistani mobile numbers can be in these formats:
+    // +92-03xx-xxxxxxx (12 digits total: 92 + 0 + 3xx + xxxxxxx)
+    // +92-3xx-xxxxxxx (11 digits total: 92 + 3xx + xxxxxxx)
+    
+    if (digits.length === 12 && digits.startsWith('920')) {
+      // Format: +92-03xx-xxxxxxx
+      const mobilePrefix = digits.substring(3, 4); // Should be 1, 2, 3, 4, or 5 for mobile
+      const isValidPrefix = ['1', '2', '3', '4', '5'].includes(mobilePrefix);
+      console.log('12-digit validation - Mobile prefix:', mobilePrefix, 'Valid:', isValidPrefix);
+      return isValidPrefix;
+    }
+    
+    if (digits.length === 11 && digits.startsWith('923')) {
+      // Format: +92-3xx-xxxxxxx  
+      const mobilePrefix = digits.substring(2, 3); // Should be 1, 2, 3, 4, or 5 for mobile
+      const isValidPrefix = ['1', '2', '3', '4', '5'].includes(mobilePrefix);
+      console.log('11-digit validation - Mobile prefix:', mobilePrefix, 'Valid:', isValidPrefix);
+      return isValidPrefix;
+    }
+    
+    console.log('Validation failed - Length:', digits.length, 'Expected format not matched');
+    return false;
+  };
+
   const validateForm = () => {
     // CNIC validation
     if (!cnic) {
@@ -393,10 +425,9 @@ export default function ComplaintRegistrationForm() {
         return false;
       }
       
-      // Phone validation
-      const phoneRegex = /^(\+92|0)?[3]\d{9}$/;
-      if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
-        setApiError('Please enter a valid Pakistani mobile number');
+      // Updated phone validation
+      if (!validatePhoneNumber(phone)) {
+        setApiError('Please enter a valid Pakistani mobile number (03xx-xxxxxxx format)');
         return false;
       }
       
@@ -534,7 +565,7 @@ export default function ComplaintRegistrationForm() {
         // Reset form
         setName('');
         setCnic('');
-        setPhone('');
+        setPhone('+92-03');
         setEmail('');
         setAddress('');
         setDescription('');
@@ -589,22 +620,42 @@ export default function ComplaintRegistrationForm() {
     }
   };
 
-  // Helper function to format phone number
+  // Updated helper function to format phone number
   const formatPhone = (value) => {
     // Remove all non-digits
     const digits = value.replace(/\D/g, '');
     
-    // If starts with 0, remove it
-    if (digits.startsWith('0')) {
-      return digits.slice(1);
-    }
-    
-    // If starts with 92, remove it
+    // If starts with 92, keep it and format the rest
+    let cleanDigits = digits;
     if (digits.startsWith('92')) {
-      return digits.slice(2);
+      cleanDigits = digits.slice(2);
     }
     
-    return digits;
+    // If starts with 0, keep it (for 03xx format)
+    // Format as +92-03xx-xxxxxxx
+    if (cleanDigits.length === 0) {
+      return '+92-03';
+    } else if (cleanDigits.length === 1 && cleanDigits === '0') {
+      return '+92-03';
+    } else if (cleanDigits.startsWith('0')) {
+      // Handle 03xx-xxxxxxx format
+      if (cleanDigits.length <= 4) {
+        return `+92-0${cleanDigits.slice(1)}`;
+      } else {
+        // Limit to 10 digits after +92-0 (total 11 digits including country code)
+        const limitedDigits = cleanDigits.slice(0, 10);
+        return `+92-0${limitedDigits.slice(1, 4)}-${limitedDigits.slice(4)}`;
+      }
+    } else {
+      // Handle 3xx-xxxxxxx format (without leading 0)
+      if (cleanDigits.length <= 3) {
+        return `+92-3${cleanDigits.slice(1)}`;
+      } else {
+        // Limit to 9 digits after +92-3 (total 11 digits including country code)
+        const limitedDigits = cleanDigits.slice(0, 9);
+        return `+92-3${limitedDigits.slice(1, 3)}-${limitedDigits.slice(3)}`;
+      }
+    }
   };
 
   const handleCNICChange = (e) => {
@@ -612,9 +663,42 @@ export default function ComplaintRegistrationForm() {
     setCnic(formatted);
   };
 
+  // Updated phone change handler
   const handlePhoneChange = (e) => {
-    const formatted = formatPhone(e.target.value);
-    setPhone(formatted);
+    const inputValue = e.target.value;
+    
+    // If user is trying to clear the field or input is less than +92-03
+    if (inputValue.length < 6) {
+      setPhone('+92-03');
+      return;
+    }
+    
+    // Extract the part after +92-
+    const afterPrefix = inputValue.replace('+92-', '');
+    const digits = afterPrefix.replace(/\D/g, '');
+    
+    // Handle the formatting based on whether it starts with 0 or not
+    if (digits.startsWith('0')) {
+      // Format: +92-03xx-xxxxxxx
+      if (digits.length <= 4) {
+        setPhone(`+92-${digits}`);
+      } else {
+        // Limit to 10 digits total (03xx-xxxxxxx)
+        const limitedDigits = digits.slice(0, 10);
+        setPhone(`+92-${limitedDigits.slice(0, 4)}-${limitedDigits.slice(4)}`);
+      }
+    } else {
+      // Format: +92-3xx-xxxxxxx (without leading 0)
+      if (digits.length === 0) {
+        setPhone('+92-03');
+      } else if (digits.length <= 3) {
+        setPhone(`+92-${digits}`);
+      } else {
+        // Limit to 9 digits total (3xx-xxxxxxx)
+        const limitedDigits = digits.slice(0, 9);
+        setPhone(`+92-${limitedDigits.slice(0, 3)}-${limitedDigits.slice(3)}`);
+      }
+    }
   };
 
   // Helper function to format file size
@@ -843,7 +927,7 @@ export default function ComplaintRegistrationForm() {
                     />
                   </Grid>
 
-                  {/* Phone Field */}
+                  {/* Phone Field - Updated */}
                   <Grid item xs={12} md={6}>
                     <GovTextField
                       fullWidth
@@ -852,8 +936,12 @@ export default function ComplaintRegistrationForm() {
                       value={phone}
                       onChange={handlePhoneChange}
                       required
-                      placeholder="+92-300-0000000"
+                      placeholder="+92-0300-0000000"
                       variant="outlined"
+                      inputProps={{ 
+                        maxLength: 16, // +92-0300-0000000 = 16 characters
+                      }}
+                      helperText="Format: +92-0317-1330300 or +92-317-1330300"
                     />
                   </Grid>
 
@@ -1269,6 +1357,9 @@ export default function ComplaintRegistrationForm() {
               </Typography>
               <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
                 <strong>CNIC:</strong> {cnic || 'Not provided'}
+              </Typography>
+              <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
+                <strong>Phone:</strong> {registrationType === 'new' ? (phone || 'Not provided') : 'N/A'}
               </Typography>
               <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
                 <strong>Type:</strong> {applicationTypes.find(t => t._id === selectedApplicationType)?.name || 'Not selected'}
