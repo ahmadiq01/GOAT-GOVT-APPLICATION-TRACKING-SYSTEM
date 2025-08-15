@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Paper,
@@ -160,6 +161,7 @@ const GovToggleButtonGroup = styled(ToggleButtonGroup)(({ theme }) => ({
 
 export default function ComplaintRegistrationForm() {
   const theme = useTheme();
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [cnic, setCnic] = useState('');
   const [phone, setPhone] = useState('');
@@ -465,7 +467,6 @@ export default function ComplaintRegistrationForm() {
           trackingNumber: trackingNumber,
           attachments: attachments // Pass the full attachment objects for PDF generation
         };
-        
         console.log('Preparing PDF with data:', applicationForPDF);
         console.log('Officers available for PDF:', officers);
         console.log('Application types available for PDF:', applicationTypes);
@@ -529,6 +530,11 @@ export default function ComplaintRegistrationForm() {
         setSelectedOfficer('');
         setSelectedApplicationType('');
         setRegistrationType('new');
+        
+        // Redirect to login page after a short delay to show success message
+        setTimeout(() => {
+          navigate('/login');
+        }, 3000);
       }
     } catch (error) {
       console.error('Error submitting application:', error);
