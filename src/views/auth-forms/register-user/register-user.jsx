@@ -43,6 +43,13 @@ import {
 import { makeDirectRequest } from '../../../utils/axiosInstance';
 import { generateAndDownloadPDF, generateAndDownloadPDFAlternative } from '../../../utils/pdfGenerator';
 
+// Utility function to generate tracking numbers in the same format as the backend
+const generateTrackingNumber = () => {
+  const ts = Math.floor(Date.now() / 1000);
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  return `GOAT-${ts}-${rand}`;
+};
+
 // Styled components for government styling with green theme
 const GovPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(5),
@@ -433,8 +440,12 @@ export default function ComplaintRegistrationForm() {
     setSuccessMessage('');
 
     try {
+      // Generate tracking number before sending request
+      const trackingNumber = generateTrackingNumber();
+      
       // Prepare the data according to the API structure
       const applicationData = {
+        trackingNumber: trackingNumber,
         name: registrationType === 'new' ? name : 'Existing User',
         cnic: cnic,
         phone: registrationType === 'new' ? phone : 'N/A',
@@ -455,16 +466,17 @@ export default function ComplaintRegistrationForm() {
       if (response.status === 201 || response.status === 200) {
         const submittedApplication = response.data?.data;
         const applicationId = submittedApplication?._id || 'N/A';
-        const trackingNumber = submittedApplication?.trackingNumber || 'N/A';
+        // Use the tracking number we generated (or fallback to response)
+        const responseTrackingNumber = submittedApplication?.trackingNumber || trackingNumber;
         
         console.log('Application submitted successfully with ID:', applicationId);
-        console.log('Tracking Number:', trackingNumber);
+        console.log('Tracking Number:', responseTrackingNumber);
         
         // Store the submitted application data for PDF generation
         const applicationForPDF = {
           ...applicationData,
           _id: applicationId,
-          trackingNumber: trackingNumber,
+          trackingNumber: responseTrackingNumber,
           attachments: attachments // Pass the full attachment objects for PDF generation
         };
         console.log('Preparing PDF with data:', applicationForPDF);
@@ -474,13 +486,13 @@ export default function ComplaintRegistrationForm() {
         // Validate required data for PDF generation
         if (!officers || officers.length === 0) {
           console.error('Officers data not available for PDF generation');
-          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${trackingNumber}.`);
+          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${responseTrackingNumber}.`);
           return;
         }
         
         if (!applicationTypes || applicationTypes.length === 0) {
           console.error('Application types data not available for PDF generation');
-          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${trackingNumber}.`);
+          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${responseTrackingNumber}.`);
           return;
         }
         
@@ -509,14 +521,14 @@ export default function ComplaintRegistrationForm() {
           }
           
           if (pdfResult.success) {
-            setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${trackingNumber}. PDF receipt has been downloaded automatically.`);
+            setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${responseTrackingNumber}. PDF receipt has been downloaded automatically.`);
           } else {
             console.error('Both PDF generation methods failed:', pdfResult.error);
-            setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${trackingNumber}.`);
+            setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${responseTrackingNumber}.`);
           }
         } catch (pdfError) {
           console.error('PDF generation error:', pdfError);
-          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${trackingNumber}.`);
+          setSuccessMessage(`Application submitted successfully! Your application ID is: ${applicationId} and tracking number is: ${responseTrackingNumber}.`);
         }
         
         // Reset form
