@@ -25,6 +25,7 @@ import {
 
 const StatsCards = ({ stats }) => {
   return (
+    
     <Grid container spacing={3} sx={{ mb: 3 }}>
       <Grid item xs={12} sm={6} md={3}>
         <Card elevation={0} variant="outlined" sx={{ borderRadius: 2 }}>
@@ -136,7 +137,7 @@ const PostsTable = ({ posts, loading }) => {
               <TableCell align="left">Author</TableCell>
               <TableCell align="left">Status</TableCell>
               <TableCell align="left">Date</TableCell>
-              <TableCell align="left">Views</TableCell>
+              <TableCell align="left">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

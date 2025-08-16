@@ -151,16 +151,6 @@ const menuItems = [
   
   // Admin specific menu items
   {
-    id: 'admin-dashboard',
-    title: 'Admin Dashboard',
-    type: 'item',
-    url: '/app/admin/dashboard',
-    icon: icons.IconDashboard,
-    breadcrumbs: false,
-    roles: ['Admin'],
-    description: 'Main dashboard for administrators'
-  },
-  {
     id: 'admin-main',
     title: 'Admin Main Page',
     type: 'item',
@@ -169,46 +159,6 @@ const menuItems = [
     breadcrumbs: false,
     roles: ['Admin'],
     description: 'Main admin interface'
-  },
-  {
-    id: 'received-applications',
-    title: 'Received Applications',
-    type: 'item',
-    url: '/app/admin/applications',
-    icon: icons.IconFileDescription,
-    breadcrumbs: false,
-    roles: ['Admin'],
-    description: 'View all received applications'
-  },
-  {
-    id: 'application-detail',
-    title: 'Application Detail View',
-    type: 'item',
-    url: '/app/admin/application-detail',
-    icon: icons.IconFileAnalytics,
-    breadcrumbs: false,
-    roles: ['Admin'],
-    description: 'Detailed view of individual applications'
-  },
-  {
-    id: 'application-processing',
-    title: 'Application Processing',
-    type: 'item',
-    url: '/app/admin/processing',
-    icon: icons.IconChecklist,
-    breadcrumbs: false,
-    roles: ['Admin'],
-    description: 'Process and review applications'
-  },
-  {
-    id: 'feedback-management',
-    title: 'Feedback Management',
-    type: 'item',
-    url: '/app/admin/feedback',
-    icon: icons.IconMessageCircle,
-    breadcrumbs: false,
-    roles: ['Admin'],
-    description: 'Manage user feedback and responses'
   },
   
   // User routes

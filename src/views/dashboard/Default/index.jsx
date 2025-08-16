@@ -23,9 +23,9 @@ const Dashboard = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h2" sx={{ mb: 3 }}>
+      {/* <Typography variant="h2" sx={{ mb: 3 }}>
         Dashboard
-      </Typography>
+      </Typography> */}
 
       {isAdmin && <AdminDashboard />}
       {isSuperAdmin && <SuperAdminDashboard />}
