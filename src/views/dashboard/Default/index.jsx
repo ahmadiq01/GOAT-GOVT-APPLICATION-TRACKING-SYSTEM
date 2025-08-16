@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography, Alert } from '@mui/material';
-import AdminDashboard from './Admin/admn';
+import AdminDashboard from './Admin/admin';
 import SuperAdminDashboard from './SuperAdmin/superadmin';
 import UserDashboard from './User/user';
 

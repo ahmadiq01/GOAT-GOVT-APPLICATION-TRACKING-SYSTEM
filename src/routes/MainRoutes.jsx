@@ -17,7 +17,7 @@ const UserDashboard = Loadable(lazy(() => import('views/dashboard/Default/User/u
 const AdminDashboard = Loadable(lazy(() => import('views/dashboard/Default/Admin/AdminDashboardWrapper')));
 const AdminApplications = Loadable(lazy(() => import('views/dashboard/Default/Admin/AdminApplications')));
 const ApplicationDetail = Loadable(lazy(() => import('views/dashboard/Default/Admin/ApplicationDetail')));
-const AdminMain = Loadable(lazy(() => import('views/dashboard/Default/Admin/admn')));
+const AdminMain = Loadable(lazy(() => import('views/dashboard/Default/Admin/admin')));
 
 // Super Admin specific components
 const SuperAdminDashboard = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/MainDashboardWrapper')));

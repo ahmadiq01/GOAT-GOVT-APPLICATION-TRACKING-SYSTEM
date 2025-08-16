@@ -22,7 +22,7 @@ This document provides a comprehensive overview of all admin and super admin fil
 - **Route**: `/app/admin/application-detail`
 - **Description**: In-depth application review and processing interface
 
-### 4. **admn.jsx**
+### 4. **admin.jsx**
 - **Purpose**: Admin main page component
 - **Functionality**: Entry point for admin users
 - **Route**: `/app/admin/main`
