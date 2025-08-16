@@ -40,7 +40,7 @@ import {
   Delete as DeleteIcon,
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
-import { makeDirectRequest } from '../../../utils/axiosInstance';
+import { makeDirectRequest, axiosInstance } from '../../../utils/axiosInstance';
 import { generateAndDownloadPDF, generateAndDownloadPDFAlternative } from '../../../utils/pdfGenerator';
 
 // Utility function to generate tracking numbers in the same format as the backend
@@ -193,6 +193,10 @@ export default function ComplaintRegistrationForm() {
   // New state for file upload
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
+  
+  // New state for fetching existing user details
+  const [fetchingUserDetails, setFetchingUserDetails] = useState(false);
+  const [userTotalApplications, setUserTotalApplications] = useState(0);
 
   // New state for confirmation dialog
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
@@ -257,13 +261,38 @@ export default function ComplaintRegistrationForm() {
   const handleRegistrationTypeChange = (event, newRegistrationType) => {
     if (newRegistrationType !== null) {
       setRegistrationType(newRegistrationType);
+      
       // Clear form fields when switching registration type
       if (newRegistrationType === 'existing') {
+        // Clear fields but keep CNIC for existing user
         setName('');
         setPhone('');
         setEmail('');
         setAddress('');
+        setDescription('');
+        setAttachments([]);
+        setSelectedOfficer('');
+        setSelectedApplicationType('');
+        setFetchingUserDetails(false);
+        setUserTotalApplications(0);
+      } else if (newRegistrationType === 'new') {
+        // Clear all fields for new user
+        setName('');
+        setPhone('');
+        setEmail('');
+        setAddress('');
+        setCnic('');
+        setDescription('');
+        setAttachments([]);
+        setSelectedOfficer('');
+        setSelectedApplicationType('');
+        setFetchingUserDetails(false);
+        setUserTotalApplications(0);
       }
+      
+      // Clear any error messages
+      setApiError('');
+      setSuccessMessage('');
     }
   };
 
@@ -452,11 +481,11 @@ export default function ComplaintRegistrationForm() {
       // Prepare the data according to the API structure
     const applicationData = {
       trackingNumber: trackingNumber,
-      name: registrationType === 'new' ? name : 'Existing User',
+      name: registrationType === 'new' ? name : (name || 'Existing User'), // Use fetched name if available
       cnic: getCNICWithoutDashes(cnic), // Remove dashes from CNIC
-      phone: registrationType === 'new' ? getPhoneWithoutDashes(phone) : 'N/A', // Remove dashes from phone
-      email: registrationType === 'new' ? email : 'N/A',
-      address: registrationType === 'new' ? address : 'N/A',
+      phone: registrationType === 'new' ? getPhoneWithoutDashes(phone) : (phone || 'N/A'), // Use fetched phone if available
+      email: registrationType === 'new' ? email : (email || 'N/A'), // Use fetched email if available
+      address: registrationType === 'new' ? address : (address || 'N/A'), // Use fetched address if available
       applicationType: selectedApplicationType,
       officer: selectedOfficer,
       description: description,
@@ -548,6 +577,8 @@ export default function ComplaintRegistrationForm() {
         setSelectedOfficer('');
         setSelectedApplicationType('');
         setRegistrationType('new');
+        setFetchingUserDetails(false);
+        setUserTotalApplications(0);
         
         // Redirect to login page after a short delay to show success message
         setTimeout(() => {
@@ -600,8 +631,90 @@ export default function ComplaintRegistrationForm() {
   const handleCNICChange = (e) => {
     const formatted = formatCNIC(e.target.value);
     setCnic(formatted);
+    
+    // If this is an existing user and CNIC is complete, fetch user details
+    if (registrationType === 'existing' && formatted.length === 15) {
+      fetchExistingUserDetails(formatted);
+    }
   };
 
+  // Function to fetch existing user details from API
+// fetchExistingUserDetails 
+// Updated fetchExistingUserDetails function
+const fetchExistingUserDetails = async (cnicNumber) => {
+  try {
+    setFetchingUserDetails(true);
+    setApiError('');
+    
+    // Remove dashes from CNIC for API call
+    const cnicWithoutDashes = getCNICWithoutDashes(cnicNumber);
+    
+    // Use the live API URL
+    const response = await axiosInstance.get(`/applications/user/details/${cnicWithoutDashes}`);
+    
+    if (response.data && response.data.success) {
+      const userData = response.data.data;
+      
+      // Map the API response fields to your form fields
+      // The API returns field names with spaces and different structure
+      
+      // Set name - check for both possible field names
+      const fullName = userData["Full Name"] || userData.name;
+      if (fullName && fullName !== "N/A" && fullName !== "Existing User") {
+        setName(fullName);
+      }
+      
+      // Set phone - remove any formatting and handle Pakistani format
+      const mobileNumber = userData["Mobile Number"] || userData.phone;
+      if (mobileNumber && mobileNumber !== "N/A") {
+        // Format the phone number for display (add dash after 4 digits)
+        const cleanPhone = mobileNumber.replace(/\D/g, ''); // Remove all non-digits
+        if (cleanPhone.length === 11) {
+          const formattedPhone = `${cleanPhone.slice(0, 4)}-${cleanPhone.slice(4)}`;
+          setPhone(formattedPhone);
+        } else {
+          setPhone(mobileNumber); // Use as-is if not 11 digits
+        }
+      }
+      
+      // Set email
+      const emailAddress = userData["Email Address"] || userData.email;
+      if (emailAddress && emailAddress !== "N/A") {
+        setEmail(emailAddress);
+      }
+      
+      // Set address
+      const completeAddress = userData["Complete Address"] || userData.address;
+      if (completeAddress && completeAddress !== "N/A") {
+        setAddress(completeAddress);
+      }
+      
+      // Store total applications count
+      const totalApplications = userData["Total Applications"] || 0;
+      setUserTotalApplications(totalApplications);
+      
+      // Show success message with additional info
+      setSuccessMessage(`Existing user details loaded successfully! This user has ${totalApplications} previous application(s).`);
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSuccessMessage(''), 5000);
+    }
+  } catch (error) {
+    console.error('Error fetching existing user details:', error);
+    
+    if (error.response?.status === 404) {
+      setApiError('No existing user found with this CNIC number. Please check the CNIC or select "New User" instead.');
+    } else if (error.response?.status === 500) {
+      setApiError('Server error while fetching user details. Please try again.');
+    } else if (error.code === 'NETWORK_ERROR') {
+      setApiError('Network error. Please check your internet connection.');
+    } else {
+      setApiError('Failed to fetch user details. Please try again.');
+    }
+  } finally {
+    setFetchingUserDetails(false);
+  }
+};
   const getCNICWithoutDashes = (cnicWithDashes) => {
   return cnicWithDashes.replace(/\D/g, '');
 };
@@ -909,16 +1022,97 @@ const getPhoneWithoutDashes = (phoneWithDashes) => {
 
               {/* CNIC Field */}
               <Grid item xs={12} md={6}>
-                <GovTextField
-                  fullWidth
-                  label="CNIC Number"
-                  value={cnic}
-                  onChange={handleCNICChange}
-                  required
-                  placeholder="00000-0000000-0"
-                  variant="outlined"
-                  inputProps={{ maxLength: 15 }}
-                />
+                <Box sx={{ position: 'relative' }}>
+                  <GovTextField
+                    fullWidth
+                    label="CNIC Number"
+                    value={cnic}
+                    onChange={handleCNICChange}
+                    required
+                    placeholder="00000-0000000-0"
+                    variant="outlined"
+                    inputProps={{ maxLength: 15 }}
+                    helperText={
+                      registrationType === 'existing' 
+                        ? (fetchingUserDetails 
+                            ? 'Fetching user details...' 
+                            : 'Enter your CNIC to automatically load your existing details')
+                        : 'Enter your CNIC number'
+                    }
+                  />
+                  {fetchingUserDetails && (
+                    <CircularProgress
+                      size={20}
+                      sx={{
+                        position: 'absolute',
+                        right: 12,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        color: '#00ce5a'
+                      }}
+                    />
+                  )}
+                </Box>
+                {registrationType === 'existing' && cnic.length === 15 && !fetchingUserDetails && (
+                  <Typography variant="caption" sx={{ 
+                    color: '#00ce5a', 
+                    display: 'block', 
+                    mt: 0.5,
+                    fontWeight: 500
+                  }}>
+                    ✓ CNIC format is correct. User details will be loaded automatically.
+                  </Typography>
+                )}
+
+                {/* Display fetched user details for existing users */}
+                {registrationType === 'existing' && name && (
+                  <Grid item xs={12}>
+                    <Alert 
+                      severity="success" 
+                      sx={{ 
+                        borderRadius: 1,
+                        bgcolor: '#e8f8f0',
+                        border: '1px solid #b8e6c1',
+                        '& .MuiAlert-icon': {
+                          color: '#00ce5a'
+                        }
+                      }}
+                    >
+                      <Typography variant="subtitle2" sx={{ mb: 1, color: '#00a047', display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CheckCircleIcon sx={{ fontSize: 18 }} />
+                        User Details Retrieved Successfully
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="body2" sx={{ color: '#424242' }}>
+                            <strong>Name:</strong> {name}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="body2" sx={{ color: '#424242' }}>
+                            <strong>Phone:</strong> {phone || 'N/A'}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="body2" sx={{ color: '#424242' }}>
+                            <strong>Email:</strong> {email || 'N/A'}
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="body2" sx={{ color: '#424242' }}>
+                            <strong>Address:</strong> {address || 'N/A'}
+                          </Typography>
+                        </Grid>
+                        
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="body2" sx={{ color: '#424242' }}>
+                            <strong>Total Previous Applications:</strong> {userTotalApplications}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+                    </Alert>
+                  </Grid>
+                )}
               </Grid>
 
               {/* Application Information Section */}
@@ -1152,7 +1346,7 @@ const getPhoneWithoutDashes = (phoneWithDashes) => {
                         <strong>Applicant Name:</strong>
                       </Typography>
                       <Typography variant="body2" sx={{ color: '#424242', mb: 2 }}>
-                        {registrationType === 'new' ? (name || 'Not provided') : 'Existing User'}
+                        {registrationType === 'new' ? (name || 'Not provided') : (name || 'Existing User')}
                       </Typography>
                     </Grid>
                     
@@ -1164,6 +1358,46 @@ const getPhoneWithoutDashes = (phoneWithDashes) => {
                         {cnic || 'Not provided'}
                       </Typography>
                     </Grid>
+                    
+                    {registrationType === 'existing' && (phone || email || address) && (
+                      <>
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
+                            <strong>Phone:</strong>
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: '#424242', mb: 2 }}>
+                            {phone || 'N/A'}
+                          </Typography>
+                        </Grid>
+                        
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
+                            <strong>Email:</strong>
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: '#424242', mb: 2 }}>
+                            {email || 'N/A'}
+                          </Typography>
+                        </Grid>
+                        
+                        <Grid item xs={12}>
+                          <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
+                            <strong>Address:</strong>
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: '#424242', mb: 2 }}>
+                            {address || 'N/A'}
+                          </Typography>
+                        </Grid>
+                        
+                        <Grid item xs={12} md={6}>
+                          <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
+                            <strong>Total Previous Applications:</strong>
+                          </Typography>
+                          <Typography variant="body2" sx={{ color: '#424242', mb: 2 }}>
+                            {userTotalApplications}
+                          </Typography>
+                        </Grid>
+                      </>
+                    )}
                     
                     <Grid item xs={12} md={6}>
                       <Typography variant="subtitle2" sx={{ color: '#666', mb: 0.5 }}>
@@ -1272,13 +1506,13 @@ const getPhoneWithoutDashes = (phoneWithDashes) => {
                 <strong>Application Summary:</strong>
               </Typography>
               <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
-                <strong>Name:</strong> {registrationType === 'new' ? (name || 'Not provided') : 'Existing User'}
+                <strong>Name:</strong> {registrationType === 'new' ? (name || 'Not provided') : (name || 'Existing User')}
               </Typography>
               <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
                 <strong>CNIC:</strong> {cnic || 'Not provided'}
               </Typography>
               <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
-                <strong>Phone:</strong> {registrationType === 'new' ? (phone || 'Not provided') : 'N/A'}
+                <strong>Phone:</strong> {registrationType === 'new' ? (phone || 'Not provided') : (phone || 'N/A')}
               </Typography>
               <Typography variant="body2" sx={{ color: '#424242', mb: 0.5 }}>
                 <strong>Type:</strong> {applicationTypes.find(t => t._id === selectedApplicationType)?.name || 'Not selected'}
