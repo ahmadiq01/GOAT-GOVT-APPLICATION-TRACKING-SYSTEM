@@ -76,7 +76,7 @@ export default function ProfileSection() {
     // Optionally clear any other session data
 
     // Redirect to root page (register-user)
-    navigate('/');
+    navigate('/login');
   };
 
   return (
