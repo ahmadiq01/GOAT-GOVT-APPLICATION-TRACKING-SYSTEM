@@ -69,24 +69,14 @@ const getUserData = () => {
 const menuItems = [
   // Super Admin specific menu items
   {
-    id: 'super-admin-dashboard',
-    title: 'Super Admin Dashboard',
+    id: 'user-management',
+    title: 'Dashboard',
     type: 'item',
-    url: '/app/super-admin/dashboard',
-    icon: icons.IconDashboard,
+    url: '/app/dashboard',
+    icon: icons.IconUsers,
     breadcrumbs: false,
     roles: ['SuperAdmin'],
-    description: 'Main dashboard for super administrators'
-  },
-  {
-    id: 'super-admin-main',
-    title: 'Super Admin Main Page',
-    type: 'item',
-    url: '/app/super-admin/main',
-    icon: icons.IconHome,
-    breadcrumbs: false,
-    roles: ['SuperAdmin'],
-    description: 'Main super admin interface'
+    description: 'Manage all users in the system'
   },
   {
     id: 'user-management',
@@ -99,26 +89,6 @@ const menuItems = [
     description: 'Manage all users in the system'
   },
   {
-    id: 'application-management',
-    title: 'Application Management',
-    type: 'item',
-    url: '/app/super-admin/applications',
-    icon: icons.IconClipboardList,
-    breadcrumbs: false,
-    roles: ['SuperAdmin'],
-    description: 'Overview of all applications'
-  },
-  {
-    id: 'applications-table',
-    title: 'Applications Table View',
-    type: 'item',
-    url: '/app/super-admin/applications-table',
-    icon: icons.IconTable,
-    breadcrumbs: false,
-    roles: ['SuperAdmin'],
-    description: 'View applications in table format'
-  },
-  {
     id: 'applications-list',
     title: 'Applications List View',
     type: 'item',
@@ -128,27 +98,6 @@ const menuItems = [
     roles: ['SuperAdmin'],
     description: 'View applications in list format'
   },
-  {
-    id: 'applications-filter',
-    title: 'Applications Filter Section',
-    type: 'item',
-    url: '/app/super-admin/applications-filter',
-    icon: icons.IconFilter,
-    breadcrumbs: false,
-    roles: ['SuperAdmin'],
-    description: 'Filter and search applications'
-  },
-  {
-    id: 'notification-center',
-    title: 'Notification Center',
-    type: 'item',
-    url: '/app/super-admin/notifications',
-    icon: icons.IconBell,
-    breadcrumbs: false,
-    roles: ['SuperAdmin'],
-    description: 'Manage system notifications'
-  },
-  
   // Admin specific menu items
   {
     id: 'admin-main',
