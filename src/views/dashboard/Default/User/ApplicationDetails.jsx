@@ -34,72 +34,69 @@ import {
   PictureAsPdf as PdfIcon,
   Send as SendIcon,
   Visibility as VisibilityIcon,
-  Download as DownloadIcon
+  Download as DownloadIcon,
+  Badge as BadgeIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-// Mock user data
-const mockUserData = {
-  name: 'Ahmed Khan',
-  email: 'ahmed.khan@email.com',
-  phone: '+92 300 1234567',
-  address: '123 Main Street, Saddar, Rawalpindi, Punjab, Pakistan',
-  cnic: '12345-6789012-3',
-  avatar: null
+// API service functions
+const API_BASE_URL = 'http://localhost:5000/api';
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
 };
 
-// Mock documents data
-const mockDocuments = [
-  {
-    id: 1,
-    name: 'Business_License_Form.pdf',
-    type: 'application/pdf',
-    url: 'data:application/pdf;base64,mock-pdf-data',
-    size: '2.1 MB',
-    uploadDate: '2024-08-05'
-  },
-  {
-    id: 2,
-    name: 'Identity_Document.jpg',
-    type: 'image/jpeg',
-    url: 'https://via.placeholder.com/600x800/e3f2fd/1976d2?text=CNIC+Front',
-    size: '1.2 MB',
-    uploadDate: '2024-08-05'
-  },
-  {
-    id: 3,
-    name: 'Business_Plan.pdf',
-    type: 'application/pdf',
-    url: 'data:application/pdf;base64,mock-pdf-data-2',
-    size: '3.5 MB',
-    uploadDate: '2024-08-05'
-  }
-];
+const fetchApplicationDetails = async (applicationId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/applications/${applicationId}`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
 
-// Mock comments/chat data
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching application details:', error);
+    throw error;
+  }
+};
+
+const submitComment = async (applicationId, commentData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/applications/${applicationId}/comments`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(commentData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error submitting comment:', error);
+    throw error;
+  }
+};
+
+// Mock comments data - you can replace this with real API data when available
 const mockComments = [
   {
     id: 1,
     sender: 'officer',
-    senderName: 'John Smith',
-    message: 'Thank you for submitting your business license application. I have reviewed the initial documents and need some clarification on the business structure details.',
-    timestamp: '2024-08-06T10:30:00Z',
-    avatar: null
-  },
-  {
-    id: 2,
-    sender: 'user',
-    senderName: 'Ahmed Khan',
-    message: 'Thank you for the quick response. Could you please specify which particular aspects of the business structure need clarification? I am ready to provide additional information.',
-    timestamp: '2024-08-06T14:15:00Z',
-    avatar: null
-  },
-  {
-    id: 3,
-    sender: 'officer',
-    senderName: 'John Smith',
-    message: 'I need clarification on the partnership structure and the roles of each partner. Please provide a detailed partnership agreement or document outlining responsibilities.',
-    timestamp: '2024-08-07T09:20:00Z',
+    senderName: 'System Officer',
+    message: 'Application received and is under initial review. All required documents have been verified.',
+    timestamp: new Date().toISOString(),
     avatar: null
   }
 ];
@@ -109,9 +106,11 @@ const ApplicationDetails = () => {
   const location = useLocation();
   const application = location.state?.application;
 
+  const [applicationDetails, setApplicationDetails] = useState(application);
   const [comments, setComments] = useState(mockComments);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(false);
+  const [detailsLoading, setDetailsLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: '',
@@ -120,22 +119,54 @@ const ApplicationDetails = () => {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
 
-  // Redirect if no application data - but allow direct access for demo purposes
-  useEffect(() => {
-    if (!application) {
-      // For demo purposes, create a mock application if none provided
-      console.log('No application data provided, using mock data for demonstration');
-    }
-  }, [application, navigate]);
+  // Get user data from localStorage
+  const userData = localStorage.getItem('userData') ? JSON.parse(localStorage.getItem('userData')) : null;
 
-  // Use mock application data if none provided (for demo purposes)
-  const displayApplication = application || {
-    id: 'demo-001',
-    applicationSubject: 'Business License Application',
-    status: 'pending',
-    officer: 'Officer A. Johnson',
-    date: '2024-01-15',
-    remarks: 'Application is under review. Additional documentation may be required.'
+  useEffect(() => {
+    if (application && application._id) {
+      loadApplicationDetails(application._id);
+    } else if (!application) {
+      console.log('No application data provided');
+      // For demo purposes, allow viewing without redirecting
+    }
+  }, [application]);
+
+  const loadApplicationDetails = async (applicationId) => {
+    setDetailsLoading(true);
+    try {
+      const response = await fetchApplicationDetails(applicationId);
+      if (response.success) {
+        setApplicationDetails(response.data);
+      }
+    } catch (error) {
+      console.error('Error loading application details:', error);
+      setSnackbar({
+        open: true,
+        message: 'Failed to load application details.',
+        severity: 'error'
+      });
+    } finally {
+      setDetailsLoading(false);
+    }
+  };
+
+  // Use real or mock application data
+  const displayApplication = applicationDetails || {
+    _id: 'demo-001',
+    trackingNumber: 'DEMO-123456789-0001',
+    applicationType: { name: 'Demo Application' },
+    status: 'Submitted',
+    officer: { name: 'Demo Officer', designation: 'Demo Designation' },
+    submittedAt: new Date().toISOString(),
+    description: 'This is a demo application for testing purposes.',
+    user: userData || {
+      name: 'Demo User',
+      email: 'demo@example.com',
+      phoneNo: '+92-300-0000000',
+      address: 'Demo Address',
+      nic: '00000-0000000-0'
+    },
+    attachments: []
   };
 
   const handleSubmitComment = async (event) => {
@@ -153,19 +184,41 @@ const ApplicationDetails = () => {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // If we have a real application ID, try to submit to API
+      if (displayApplication._id && displayApplication._id !== 'demo-001') {
+        const commentData = {
+          message: newComment.trim()
+        };
 
-      const comment = {
-        id: comments.length + 1,
-        sender: 'user',
-        senderName: mockUserData.name,
-        message: newComment.trim(),
-        timestamp: new Date().toISOString(),
-        avatar: null
-      };
+        const response = await submitComment(displayApplication._id, commentData);
+        
+        if (response.success) {
+          // Add the comment from API response or create locally
+          const comment = response.data || {
+            id: comments.length + 1,
+            sender: 'user',
+            senderName: userData?.name || 'You',
+            message: newComment.trim(),
+            timestamp: new Date().toISOString(),
+            avatar: null
+          };
+          
+          setComments(prev => [...prev, comment]);
+        }
+      } else {
+        // For demo purposes, add comment locally
+        const comment = {
+          id: comments.length + 1,
+          sender: 'user',
+          senderName: userData?.name || 'Demo User',
+          message: newComment.trim(),
+          timestamp: new Date().toISOString(),
+          avatar: null
+        };
 
-      setComments(prev => [...prev, comment]);
+        setComments(prev => [...prev, comment]);
+      }
+
       setNewComment('');
       
       setSnackbar({
@@ -177,7 +230,7 @@ const ApplicationDetails = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: 'Failed to submit comment. Please try again.',
+        message: error.message || 'Failed to submit comment. Please try again.',
         severity: 'error'
       });
     } finally {
@@ -191,11 +244,11 @@ const ApplicationDetails = () => {
   };
 
   const handleDownloadDocument = (document) => {
-    // In a real application, this would download the actual file
-    console.log(`Downloading: ${document.name}`);
+    console.log(`Downloading: ${document.originalName || document.name}`);
     const link = document.createElement('a');
-    link.href = document.url;
-    link.download = document.name;
+    link.href = document.fileUrl || document.url;
+    link.download = document.originalName || document.name;
+    link.target = '_blank';
     link.click();
   };
 
@@ -213,7 +266,24 @@ const ApplicationDetails = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
-  // Component will always render now with either real or mock data
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+      case 'approved':
+        return 'success';
+      case 'submitted':
+      case 'pending':
+        return 'warning';
+      case 'under review':
+      case 'in progress':
+        return 'info';
+      case 'feedback required':
+      case 'rejected':
+        return 'error';
+      default:
+        return 'default';
+    }
+  };
 
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f5f7fa' }}>
@@ -227,6 +297,7 @@ const ApplicationDetails = () => {
             <Typography variant="h4" component="h1" fontWeight="bold" color="textPrimary">
               Application Details
             </Typography>
+            {detailsLoading && <CircularProgress size={24} />}
           </Box>
         </Box>
       </Paper>
@@ -240,7 +311,7 @@ const ApplicationDetails = () => {
             <Card elevation={0} variant="outlined" sx={{ borderRadius: 2, mb: 3 }}>
               <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
                 <Typography variant="subtitle1" fontWeight="medium">
-                  User Details
+                  Applicant Details
                 </Typography>
               </Box>
               <CardContent>
@@ -250,10 +321,10 @@ const ApplicationDetails = () => {
                   </Avatar>
                   <Box>
                     <Typography variant="h6" fontWeight="bold">
-                      {mockUserData.name}
+                      {displayApplication.user?.name || displayApplication.name}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      CNIC: {mockUserData.cnic}
+                      CNIC: {displayApplication.user?.nic || displayApplication.cnic}
                     </Typography>
                   </Box>
                 </Box>
@@ -263,21 +334,28 @@ const ApplicationDetails = () => {
                     <EmailIcon sx={{ mr: 2, color: 'text.secondary' }} />
                     <ListItemText
                       primary="Email"
-                      secondary={mockUserData.email}
+                      secondary={displayApplication.user?.email || displayApplication.email}
                     />
                   </ListItem>
                   <ListItem sx={{ px: 0 }}>
                     <PhoneIcon sx={{ mr: 2, color: 'text.secondary' }} />
                     <ListItemText
                       primary="Phone"
-                      secondary={mockUserData.phone}
+                      secondary={displayApplication.user?.phoneNo || displayApplication.phone}
                     />
                   </ListItem>
                   <ListItem sx={{ px: 0 }}>
                     <HomeIcon sx={{ mr: 2, color: 'text.secondary' }} />
                     <ListItemText
                       primary="Address"
-                      secondary={mockUserData.address}
+                      secondary={displayApplication.user?.address || displayApplication.address}
+                    />
+                  </ListItem>
+                  <ListItem sx={{ px: 0 }}>
+                    <BadgeIcon sx={{ mr: 2, color: 'text.secondary' }} />
+                    <ListItemText
+                      primary="Tracking Number"
+                      secondary={displayApplication.trackingNumber}
                     />
                   </ListItem>
                 </List>
@@ -294,10 +372,8 @@ const ApplicationDetails = () => {
                     Application Information
                   </Typography>
                   <Chip
-                    label={displayApplication.status.replace('_', ' ').toUpperCase()}
-                    color={displayApplication.status === 'completed' ? 'success' : 
-                           displayApplication.status === 'feedback_required' ? 'error' : 
-                           displayApplication.status === 'pending' ? 'warning' : 'info'}
+                    label={displayApplication.status?.toUpperCase() || 'UNKNOWN'}
+                    color={getStatusColor(displayApplication.status)}
                     size="small"
                     variant="outlined"
                   />
@@ -307,10 +383,10 @@ const ApplicationDetails = () => {
                 <Grid container spacing={3}>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="textSecondary">
-                      Application Subject
+                      Application Type
                     </Typography>
                     <Typography variant="body1" fontWeight="medium">
-                      {displayApplication.applicationSubject}
+                      {displayApplication.applicationType?.name || 'N/A'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -318,7 +394,7 @@ const ApplicationDetails = () => {
                       Application ID
                     </Typography>
                     <Typography variant="body1" fontWeight="medium">
-                      APP-{String(displayApplication.id).padStart(6, '0')}
+                      {displayApplication._id}
                     </Typography>
                   </Grid>
                   <Grid item xs={12} sm={6}>
@@ -326,27 +402,40 @@ const ApplicationDetails = () => {
                       Assigned Officer
                     </Typography>
                     <Typography variant="body1" fontWeight="medium">
-                      {displayApplication.officer}
+                      {displayApplication.officer?.name || 'Not Assigned'}
                     </Typography>
+                    {displayApplication.officer?.designation && (
+                      <Typography variant="caption" color="textSecondary" display="block">
+                        {displayApplication.officer.designation}
+                      </Typography>
+                    )}
                   </Grid>
                   <Grid item xs={12} sm={6}>
                     <Typography variant="body2" color="textSecondary">
                       Submission Date
                     </Typography>
                     <Typography variant="body1" fontWeight="medium">
-                      {new Date(displayApplication.date).toLocaleDateString('en-US', {
+                      {new Date(displayApplication.submittedAt || displayApplication.createdAt).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
                       })}
                     </Typography>
                   </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Acknowledgement
+                    </Typography>
+                    <Typography variant="body1" fontWeight="medium">
+                      {displayApplication.acknowledgement || 'N/A'}
+                    </Typography>
+                  </Grid>
                   <Grid item xs={12}>
                     <Typography variant="body2" color="textSecondary">
-                      Current Remarks
+                      Description
                     </Typography>
                     <Typography variant="body1">
-                      {displayApplication.remarks || 'No remarks available'}
+                      {displayApplication.description || 'No description available'}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -354,69 +443,71 @@ const ApplicationDetails = () => {
             </Card>
 
             {/* Documents Card */}
-            <Card elevation={0} variant="outlined" sx={{ borderRadius: 2, mb: 3 }}>
-              <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <Typography variant="subtitle1" fontWeight="medium">
-                  Attached Documents ({mockDocuments.length})
-                </Typography>
-              </Box>
-              <CardContent>
-                <Grid container spacing={2}>
-                  {mockDocuments.map((document) => (
-                    <Grid item xs={12} sm={6} md={4} key={document.id}>
-                      <Paper 
-                        variant="outlined" 
-                        sx={{ 
-                          p: 2, 
-                          borderRadius: 2, 
-                          '&:hover': { boxShadow: 2 },
-                          transition: 'box-shadow 0.2s'
-                        }}
-                      >
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                          {document.type.includes('image') ? (
-                            <ImageIcon sx={{ mr: 1, color: 'success.main' }} />
-                          ) : (
-                            <PdfIcon sx={{ mr: 1, color: 'error.main' }} />
-                          )}
-                          <Typography 
-                            variant="body2" 
-                            fontWeight="medium" 
-                            sx={{ 
-                              overflow: 'hidden', 
-                              textOverflow: 'ellipsis', 
-                              whiteSpace: 'nowrap',
-                              flex: 1
-                            }}
-                          >
-                            {document.name}
+            {displayApplication.attachments && displayApplication.attachments.length > 0 && (
+              <Card elevation={0} variant="outlined" sx={{ borderRadius: 2, mb: 3 }}>
+                <Box sx={{ p: 2, bgcolor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <Typography variant="subtitle1" fontWeight="medium">
+                    Attached Documents ({displayApplication.attachments.length})
+                  </Typography>
+                </Box>
+                <CardContent>
+                  <Grid container spacing={2}>
+                    {displayApplication.attachments.map((document, index) => (
+                      <Grid item xs={12} sm={6} md={4} key={index}>
+                        <Paper 
+                          variant="outlined" 
+                          sx={{ 
+                            p: 2, 
+                            borderRadius: 2, 
+                            '&:hover': { boxShadow: 2 },
+                            transition: 'box-shadow 0.2s'
+                          }}
+                        >
+                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            {document.fileUrl?.includes('image') || document.originalName?.includes('.jpg') || document.originalName?.includes('.png') ? (
+                              <ImageIcon sx={{ mr: 1, color: 'success.main' }} />
+                            ) : (
+                              <PdfIcon sx={{ mr: 1, color: 'error.main' }} />
+                            )}
+                            <Typography 
+                              variant="body2" 
+                              fontWeight="medium" 
+                              sx={{ 
+                                overflow: 'hidden', 
+                                textOverflow: 'ellipsis', 
+                                whiteSpace: 'nowrap',
+                                flex: 1
+                              }}
+                            >
+                              {document.originalName || `Document ${index + 1}`}
+                            </Typography>
+                          </Box>
+                          <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 2 }}>
+                            {new Date(displayApplication.submittedAt).toLocaleDateString()}
                           </Typography>
-                        </Box>
-                        <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 2 }}>
-                          {document.size} • {new Date(document.uploadDate).toLocaleDateString()}
-                        </Typography>
-                        <Box sx={{ display: 'flex', gap: 1 }}>
-                          <Button
-                            size="small"
-                            startIcon={<VisibilityIcon />}
-                            onClick={() => handleViewDocument(document)}
-                          >
-                            View
-                          </Button>
-                          <Button
-                            size="small"
-                            startIcon={<DownloadIcon />}
-                            onClick={() => handleDownloadDocument(document)}
-                          >
-                            Download
-                          </Button>
-                        </Box>
-                      </Paper>
-                    </Grid>
-                  ))}
-                </Grid>
-              </CardContent>
-            </Card>
+                          <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Button
+                              size="small"
+                              startIcon={<VisibilityIcon />}
+                              onClick={() => handleViewDocument(document)}
+                            >
+                              View
+                            </Button>
+                            <Button
+                              size="small"
+                              startIcon={<DownloadIcon />}
+                              onClick={() => handleDownloadDocument(document)}
+                            >
+                              Download
+                            </Button>
+                          </Box>
+                        </Paper>
+                      </Grid>
+                    ))}
+                  </Grid>
+                </CardContent>
+              </Card>
+            )}
           </Grid>
 
           {/* Comments/Chat Section */}
@@ -510,17 +601,17 @@ const ApplicationDetails = () => {
       >
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            {selectedDocument?.type.includes('image') ? <ImageIcon /> : <PdfIcon />}
-            {selectedDocument?.name}
+            {selectedDocument?.fileUrl?.includes('image') || selectedDocument?.originalName?.includes('.jpg') || selectedDocument?.originalName?.includes('.png') ? <ImageIcon /> : <PdfIcon />}
+            {selectedDocument?.originalName || 'Document'}
           </Box>
         </DialogTitle>
         <DialogContent>
           {selectedDocument && (
             <Box sx={{ textAlign: 'center' }}>
-              {selectedDocument.type.includes('image') ? (
+              {selectedDocument.fileUrl?.includes('image') || selectedDocument.originalName?.includes('.jpg') || selectedDocument.originalName?.includes('.png') ? (
                 <img
-                  src={selectedDocument.url}
-                  alt={selectedDocument.name}
+                  src={selectedDocument.fileUrl || selectedDocument.url}
+                  alt={selectedDocument.originalName}
                   style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain' }}
                 />
               ) : (
@@ -530,7 +621,7 @@ const ApplicationDetails = () => {
                     PDF Document
                   </Typography>
                   <Typography variant="body2" color="textSecondary" sx={{ mb: 2 }}>
-                    {selectedDocument.name} ({selectedDocument.size})
+                    {selectedDocument.originalName}
                   </Typography>
                   <Button
                     variant="contained"

@@ -13,7 +13,8 @@ import {
   Typography,
   CircularProgress,
   TablePagination,
-  IconButton
+  IconButton,
+  Alert
 } from '@mui/material';
 import {
   Assignment as AssignmentIcon,
@@ -28,99 +29,50 @@ import { Card as AntCard } from 'antd';
 import { Statistic } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
-// Mock data for applications
-const mockApplications = [
-  {
-    id: 1,
-    applicationSubject: 'Business License Application',
-    status: 'pending',
-    officer: 'John Smith',
-    date: '2024-08-05',
-    requiresFeedback: false,
-    pdfUrl: '/documents/app_001.pdf',
-    remarks: 'Application submitted successfully. Awaiting initial review.'
-  },
-  {
-    id: 2,
-    applicationSubject: 'Tax Registration Request',
-    status: 'feedback_required',
-    officer: 'Sarah Johnson',
-    date: '2024-08-03',
-    requiresFeedback: true,
-    pdfUrl: '/documents/app_002.pdf',
-    remarks: 'Additional documentation required for tax compliance verification.'
-  },
-  {
-    id: 3,
-    applicationSubject: 'Construction Permit',
-    status: 'completed',
-    officer: 'Mike Wilson',
-    date: '2024-07-28',
-    requiresFeedback: false,
-    pdfUrl: '/documents/app_003.pdf',
-    remarks: 'Permit approved. Valid for 12 months from issue date.'
-  },
-  {
-    id: 4,
-    applicationSubject: 'Import License Application',
-    status: 'under_review',
-    officer: 'Lisa Chen',
-    date: '2024-08-01',
-    requiresFeedback: false,
-    pdfUrl: '/documents/app_004.pdf',
-    remarks: 'Currently under technical review by customs department.'
-  },
-  {
-    id: 5,
-    applicationSubject: 'Health Department Clearance',
-    status: 'feedback_required',
-    officer: 'David Brown',
-    date: '2024-07-30',
-    requiresFeedback: true,
-    pdfUrl: '/documents/app_005.pdf',
-    remarks: 'Health inspection report needs clarification on safety protocols.'
-  },
-  {
-    id: 6,
-    applicationSubject: 'Environmental Impact Assessment',
-    status: 'completed',
-    officer: 'Emma Davis',
-    date: '2024-07-25',
-    requiresFeedback: false,
-    pdfUrl: '/documents/app_006.pdf',
-    remarks: 'Assessment completed. No significant environmental impact found.'
-  },
-  {
-    id: 7,
-    applicationSubject: 'Fire Safety Certificate',
-    status: 'pending',
-    officer: 'Tom Wilson',
-    date: '2024-08-07',
-    requiresFeedback: false,
-    pdfUrl: '/documents/app_007.pdf',
-    remarks: 'Scheduled for fire safety inspection next week.'
-  },
-  {
-    id: 8,
-    applicationSubject: 'Zoning Variance Request',
-    status: 'under_review',
-    officer: 'Alex Rodriguez',
-    date: '2024-08-02',
-    requiresFeedback: false,
-    pdfUrl: '/documents/app_008.pdf',
-    remarks: 'Planning committee reviewing variance request for compliance.'
-  }
-];
+// API service functions
+const API_BASE_URL = 'http://localhost:5000/api';
 
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+};
+
+const fetchApplications = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/applications/comprehensive`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    throw error;
+  }
+};
+
+// Status mapping functions
 const getStatusColor = (status) => {
-  switch (status) {
+  switch (status?.toLowerCase()) {
     case 'completed':
+    case 'approved':
       return 'success';
+    case 'submitted':
     case 'pending':
       return 'warning';
-    case 'under_review':
+    case 'under review':
+    case 'in progress':
       return 'info';
-    case 'feedback_required':
+    case 'feedback required':
+    case 'rejected':
       return 'error';
     default:
       return 'default';
@@ -128,21 +80,10 @@ const getStatusColor = (status) => {
 };
 
 const getStatusLabel = (status) => {
-  switch (status) {
-    case 'completed':
-      return 'Completed';
-    case 'pending':
-      return 'Pending';
-    case 'under_review':
-      return 'Under Review';
-    case 'feedback_required':
-      return 'Feedback Required';
-    default:
-      return status;
-  }
+  return status || 'Unknown Status';
 };
 
-const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetails }) => {
+const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetails, onRefresh }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -155,13 +96,12 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetai
     setPage(0);
   };
 
-  const handleDownloadPDF = (pdfUrl, applicationSubject) => {
-    // In a real application, this would download the actual PDF
-    console.log(`Downloading PDF for: ${applicationSubject}`);
-    // You can implement actual download logic here
+  const handleDownloadAttachment = (attachment, applicationSubject) => {
+    console.log(`Downloading attachment for: ${applicationSubject}`);
     const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = `${applicationSubject.replace(/\s+/g, '_')}.pdf`;
+    link.href = attachment.fileUrl;
+    link.download = attachment.originalName || `${applicationSubject.replace(/\s+/g, '_')}.pdf`;
+    link.target = '_blank';
     link.click();
   };
 
@@ -176,7 +116,8 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetai
         <Button 
           startIcon={<RefreshIcon />} 
           size="small"
-          onClick={() => window.location.reload()}
+          onClick={onRefresh}
+          disabled={loading}
         >
           Refresh
         </Button>
@@ -185,10 +126,12 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetai
         <Table sx={{ minWidth: 650 }}>
           <TableHead>
             <TableRow sx={{ bgcolor: '#f8fafc' }}>
+              <TableCell align="left">Tracking Number</TableCell>
               <TableCell align="left">Application Subject</TableCell>
               <TableCell align="left">Status</TableCell>
               <TableCell align="left">Assigned Officer</TableCell>
-              <TableCell align="left">Date</TableCell>
+              <TableCell align="left">Submitted Date</TableCell>
+              <TableCell align="left">Description</TableCell>
               <TableCell align="left">Remarks</TableCell>
               <TableCell align="left">Actions</TableCell>
             </TableRow>
@@ -196,13 +139,13 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetai
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
                   <CircularProgress size={24} />
                 </TableCell>
               </TableRow>
             ) : displayApplications.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
                   <Typography variant="body1" color="text.secondary">
                     No applications found
                   </Typography>
@@ -210,10 +153,15 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetai
               </TableRow>
             ) : (
               displayApplications.map((application) => (
-                <TableRow key={application.id} hover>
+                <TableRow key={application._id} hover>
+                  <TableCell align="left">
+                    <Typography variant="body2" fontWeight="medium" color="primary">
+                      {application.trackingNumber}
+                    </Typography>
+                  </TableCell>
                   <TableCell align="left">
                     <Typography variant="body2" fontWeight="medium">
-                      {application.applicationSubject}
+                      {application.applicationType?.name || 'N/A'}
                     </Typography>
                   </TableCell>
                   <TableCell align="left">
@@ -225,13 +173,20 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetai
                     />
                   </TableCell>
                   <TableCell align="left">
-                    <Typography variant="body2">
-                      {application.officer}
-                    </Typography>
+                    <Box>
+                      <Typography variant="body2" fontWeight="medium">
+                        {application.officer?.name || 'Not Assigned'}
+                      </Typography>
+                      {application.officer?.designation && (
+                        <Typography variant="caption" color="text.secondary">
+                          {application.officer.designation}
+                        </Typography>
+                      )}
+                    </Box>
                   </TableCell>
                   <TableCell align="left">
                     <Typography variant="body2">
-                      {new Date(application.date).toLocaleDateString('en-US', {
+                      {new Date(application.submittedAt).toLocaleDateString('en-US', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric'
@@ -247,13 +202,13 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetai
                         textOverflow: 'ellipsis', 
                         whiteSpace: 'nowrap' 
                       }}
-                      title={application.remarks}
+                      title={application.description}
                     >
-                      {application.remarks || 'No remarks'}
+                      {application.description || 'No description'}
                     </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
                       <Button
                         startIcon={<VisibilityIcon />}
                         variant="outlined"
@@ -264,7 +219,7 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetai
                         View Details
                       </Button>
                       
-                      {application.requiresFeedback && (
+                      {application.status?.toLowerCase() === 'feedback required' && (
                         <Button
                           startIcon={<FeedbackIcon />}
                           variant="contained"
@@ -276,14 +231,19 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetai
                         </Button>
                       )}
                       
-                      <IconButton
-                        size="small"
-                        color="info"
-                        onClick={() => handleDownloadPDF(application.pdfUrl, application.applicationSubject)}
-                        title="Download PDF"
-                      >
-                        <DownloadIcon fontSize="small" />
-                      </IconButton>
+                      {application.attachments && application.attachments.length > 0 && (
+                        <IconButton
+                          size="small"
+                          color="info"
+                          onClick={() => handleDownloadAttachment(
+                            application.attachments[0], 
+                            application.applicationType?.name
+                          )}
+                          title="Download Attachment"
+                        >
+                          <DownloadIcon fontSize="small" />
+                        </IconButton>
+                      )}
                     </Box>
                   </TableCell>
                 </TableRow>
@@ -310,39 +270,87 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetai
 const UserDashboard = () => {
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [statistics, setStatistics] = useState({
     totalApplications: 0,
-    pendingApplications: 0,
+    submittedApplications: 0,
     completedApplications: 0,
     feedbackRequired: 0,
     underReview: 0
   });
+  const [userData, setUserData] = useState(null);
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setApplications(mockApplications);
+  const loadApplications = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Check if user is logged in
+      const token = localStorage.getItem('token');
+      const userDataStr = localStorage.getItem('userData');
       
-      // Calculate statistics
-      const total = mockApplications.length;
-      const pending = mockApplications.filter(app => app.status === 'pending').length;
-      const completed = mockApplications.filter(app => app.status === 'completed').length;
-      const feedback = mockApplications.filter(app => app.status === 'feedback_required').length;
-      const review = mockApplications.filter(app => app.status === 'under_review').length;
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      if (userDataStr) {
+        setUserData(JSON.parse(userDataStr));
+      }
+
+      const response = await fetchApplications();
       
-      setStatistics({
-        totalApplications: total,
-        pendingApplications: pending,
-        completedApplications: completed,
-        feedbackRequired: feedback,
-        underReview: review
-      });
+      if (response.success) {
+        const { applications: appData, statistics: stats } = response.data;
+        
+        setApplications(appData);
+        
+        // Calculate statistics from the API response
+        const total = appData.length;
+        const submitted = appData.filter(app => app.status?.toLowerCase() === 'submitted').length;
+        const completed = appData.filter(app => 
+          app.status?.toLowerCase() === 'completed' || 
+          app.status?.toLowerCase() === 'approved'
+        ).length;
+        const feedback = appData.filter(app => 
+          app.status?.toLowerCase() === 'feedback required' ||
+          app.status?.toLowerCase() === 'feedback_required'
+        ).length;
+        const review = appData.filter(app => 
+          app.status?.toLowerCase() === 'under review' ||
+          app.status?.toLowerCase() === 'in progress'
+        ).length;
+        
+        setStatistics({
+          totalApplications: total,
+          submittedApplications: submitted,
+          completedApplications: completed,
+          feedbackRequired: feedback,
+          underReview: review
+        });
+      } else {
+        throw new Error(response.message || 'Failed to fetch applications');
+      }
+    } catch (error) {
+      console.error('Error loading applications:', error);
+      setError(error.message);
       
+      // If unauthorized, redirect to login
+      if (error.message.includes('401') || error.message.includes('unauthorized')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userData');
+        navigate('/login');
+      }
+    } finally {
       setLoading(false);
-    }, 1000);
-  }, []);
+    }
+  };
+
+  useEffect(() => {
+    loadApplications();
+  }, [navigate]);
 
   const handleFeedbackClick = (application) => {
     // Navigate to feedback page with application data
@@ -354,58 +362,86 @@ const UserDashboard = () => {
     navigate('/app/ApplicationDetails', { state: { application } });
   };
 
+  const handleRefresh = () => {
+    loadApplications();
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f5f7fa' }}>
       {/* Header */}
       <Paper elevation={1} sx={{ mb: 3 }}>
         <Box sx={{ py: 3, px: 4 }}>
-          <Typography variant="h4" component="h1" fontWeight="bold" color="textPrimary" align="left">
-            My Dashboard
-          </Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Typography variant="h4" component="h1" fontWeight="bold" color="textPrimary" align="left">
+              My Dashboard
+            </Typography>
+            {userData && (
+              <Box sx={{ textAlign: 'right' }}>
+                <Typography variant="h6" fontWeight="medium">
+                  Welcome, {userData.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {userData.email}
+                </Typography>
+              </Box>
+            )}
+          </Box>
         </Box>
       </Paper>
 
       {/* Content */}
       <Box sx={{ px: 4, pb: 4 }}>
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+
         {/* Statistics Cards */}
-        <Box sx={{ display: 'flex', gap: 3, mb: 3 }}>
-          <AntCard style={{ flex: 1 }}>
+        <Box sx={{ display: 'flex', gap: 3, mb: 3, flexWrap: 'wrap' }}>
+          <AntCard style={{ flex: 1, minWidth: '200px' }}>
             <Statistic 
               title="Total Applications" 
               value={statistics.totalApplications} 
               valueStyle={{ color: '#1890ff' }}
               prefix={<AssignmentIcon />}
+              loading={loading}
             />
           </AntCard>
-          <AntCard style={{ flex: 1 }}>
+          <AntCard style={{ flex: 1, minWidth: '200px' }}>
             <Statistic 
-              title="Pending" 
-              value={statistics.pendingApplications} 
+              title="Submitted" 
+              value={statistics.submittedApplications} 
               valueStyle={{ color: '#faad14' }}
               prefix={<PendingIcon />}
+              loading={loading}
             />
           </AntCard>
-          <AntCard style={{ flex: 1 }}>
+          <AntCard style={{ flex: 1, minWidth: '200px' }}>
             <Statistic 
               title="Completed" 
               value={statistics.completedApplications} 
               valueStyle={{ color: '#52c41a' }}
               prefix={<CompletedIcon />}
+              loading={loading}
             />
           </AntCard>
-          <AntCard style={{ flex: 1 }}>
+          <AntCard style={{ flex: 1, minWidth: '200px' }}>
             <Statistic 
               title="Feedback Required" 
               value={statistics.feedbackRequired} 
               valueStyle={{ color: '#f5222d' }}
               prefix={<FeedbackIcon />}
+              loading={loading}
             />
           </AntCard>
-          <AntCard style={{ flex: 1 }}>
+          <AntCard style={{ flex: 1, minWidth: '200px' }}>
             <Statistic 
               title="Under Review" 
               value={statistics.underReview} 
               valueStyle={{ color: '#722ed1' }}
+              loading={loading}
             />
           </AntCard>
         </Box>
@@ -416,6 +452,7 @@ const UserDashboard = () => {
           loading={loading}
           onFeedbackClick={handleFeedbackClick}
           onViewDetails={handleViewDetails}
+          onRefresh={handleRefresh}
         />
       </Box>
     </Box>

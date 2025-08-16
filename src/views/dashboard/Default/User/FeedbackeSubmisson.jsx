@@ -29,6 +29,37 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+// API service functions
+const API_BASE_URL = 'http://localhost:5000/api';
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+};
+
+const submitFeedback = async (applicationId, feedbackData) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/applications/${applicationId}/feedback`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(feedbackData)
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error submitting feedback:', error);
+    throw error;
+  }
+};
+
 const FeedbackSubmission = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -144,35 +175,38 @@ const FeedbackSubmission = () => {
     setLoading(true);
 
     try {
-      // Simulate API call for feedback submission
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // In a real application, you would:
-      // 1. Upload files to server
-      // 2. Submit feedback data
-      // 3. Update application status
-
-      console.log('Submitting feedback:', {
-        applicationId: application.id,
+      // Prepare feedback data
+      const feedbackData = {
         comments: formData.comments,
-        files: attachedFiles.map(f => f.name)
-      });
+        attachments: attachedFiles.map(f => ({
+          name: f.name,
+          size: f.size,
+          type: f.type
+        }))
+      };
 
-      setSnackbar({
-        open: true,
-        message: 'Feedback submitted successfully!',
-        severity: 'success'
-      });
+      // Submit feedback to API
+      const response = await submitFeedback(application._id, feedbackData);
 
-      // Navigate back to dashboard after successful submission
-      setTimeout(() => {
-        navigate('/app/dashboard');
-      }, 2000);
+      if (response.success) {
+        setSnackbar({
+          open: true,
+          message: 'Feedback submitted successfully!',
+          severity: 'success'
+        });
+
+        // Navigate back to dashboard after successful submission
+        setTimeout(() => {
+          navigate('/app/dashboard');
+        }, 2000);
+      } else {
+        throw new Error(response.message || 'Failed to submit feedback');
+      }
 
     } catch (error) {
       setSnackbar({
         open: true,
-        message: 'Failed to submit feedback. Please try again.',
+        message: error.message || 'Failed to submit feedback. Please try again.',
         severity: 'error'
       });
     } finally {
@@ -216,7 +250,7 @@ const FeedbackSubmission = () => {
                     Application Details
                   </Typography>
                   <Chip
-                    label="Feedback Required"
+                    label={application.status || "Feedback Required"}
                     color="error"
                     size="small"
                     variant="outlined"
@@ -225,26 +259,51 @@ const FeedbackSubmission = () => {
                 <Grid container spacing={2}>
                   <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="textSecondary">
-                      Application Subject
+                      Tracking Number
                     </Typography>
                     <Typography variant="body1" fontWeight="medium">
-                      {application.applicationSubject}
+                      {application.trackingNumber}
                     </Typography>
                   </Grid>
-                  <Grid item xs={12} md={3}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="body2" color="textSecondary">
+                      Application Type
+                    </Typography>
+                    <Typography variant="body1" fontWeight="medium">
+                      {application.applicationType?.name || 'N/A'}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="textSecondary">
                       Assigned Officer
                     </Typography>
                     <Typography variant="body1" fontWeight="medium">
-                      {application.officer}
+                      {application.officer?.name || 'Not Assigned'}
                     </Typography>
+                    {application.officer?.designation && (
+                      <Typography variant="caption" color="textSecondary">
+                        {application.officer.designation}
+                      </Typography>
+                    )}
                   </Grid>
-                  <Grid item xs={12} md={3}>
+                  <Grid item xs={12} md={6}>
                     <Typography variant="body2" color="textSecondary">
-                      Date
+                      Submitted Date
                     </Typography>
                     <Typography variant="body1" fontWeight="medium">
-                      {new Date(application.date).toLocaleDateString()}
+                      {new Date(application.submittedAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="body2" color="textSecondary">
+                      Description
+                    </Typography>
+                    <Typography variant="body1">
+                      {application.description || 'No description available'}
                     </Typography>
                   </Grid>
                 </Grid>
