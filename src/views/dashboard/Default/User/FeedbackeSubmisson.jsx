@@ -25,7 +25,6 @@ import {
   Delete as DeleteIcon,
   Send as SendIcon,
   Description as DescriptionIcon,
-  CloudUpload as CloudUploadIcon,
   CheckCircle as CheckCircleIcon
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -36,8 +35,7 @@ const FeedbackSubmission = () => {
   const application = location.state?.application;
 
   const [formData, setFormData] = useState({
-    comments: '',
-    explanation: ''
+    comments: ''
   });
   const [attachedFiles, setAttachedFiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -125,10 +123,10 @@ const FeedbackSubmission = () => {
   };
 
   const validateForm = () => {
-    if (!formData.comments.trim() && !formData.explanation.trim()) {
+    if (!formData.comments.trim()) {
       setSnackbar({
         open: true,
-        message: 'Please provide either comments or explanation.',
+        message: 'Please provide your comments.',
         severity: 'error'
       });
       return false;
@@ -157,7 +155,6 @@ const FeedbackSubmission = () => {
       console.log('Submitting feedback:', {
         applicationId: application.id,
         comments: formData.comments,
-        explanation: formData.explanation,
         files: attachedFiles.map(f => f.name)
       });
 
@@ -269,28 +266,15 @@ const FeedbackSubmission = () => {
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label="Comments"
+                        label="Comments *"
                         name="comments"
                         value={formData.comments}
                         onChange={handleInputChange}
                         multiline
-                        rows={4}
-                        placeholder="Enter your comments here..."
+                        rows={6}
+                        placeholder="Enter your feedback comments here..."
                         variant="outlined"
-                      />
-                    </Grid>
-                    
-                    <Grid item xs={12}>
-                      <TextField
-                        fullWidth
-                        label="Additional Explanation"
-                        name="explanation"
-                        value={formData.explanation}
-                        onChange={handleInputChange}
-                        multiline
-                        rows={4}
-                        placeholder="Provide any additional explanation or clarification..."
-                        variant="outlined"
+                        required
                       />
                     </Grid>
 

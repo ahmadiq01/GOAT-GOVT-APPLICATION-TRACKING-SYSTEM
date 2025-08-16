@@ -128,6 +128,24 @@ const menuItems = [
     icon: icons.IconMessageCircle,
     breadcrumbs: false,
     roles: ['Admin']
+  },
+  {
+    id: 'user-dashboard',
+    title: 'My Dashboard',
+    type: 'item',
+    url: '/app/dashboard',
+    icon: icons.IconDashboard,
+    breadcrumbs: false,
+    roles: ['user']
+  },
+  {
+    id: 'user-dashboard',
+    title: 'My Dashboard',
+    type: 'item',
+    url: '/app/ApplicationDetails',
+    icon: icons.IconDashboard,
+    breadcrumbs: false,
+    roles: ['user']
   }
 ];
 
