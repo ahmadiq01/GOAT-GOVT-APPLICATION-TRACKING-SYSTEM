@@ -231,16 +231,6 @@ const menuItems = [
     breadcrumbs: false,
     roles: ['user'],
     description: 'View your application details'
-  },
-  {
-    id: 'feedback-submission',
-    title: 'Submit Feedback',
-    type: 'item',
-    url: '/app/feedback',
-    icon: icons.IconMessageCircle,
-    breadcrumbs: false,
-    roles: ['user'],
-    description: 'Submit feedback or questions'
   }
 ];
 
