@@ -21,7 +21,8 @@ import {
   CheckCircle as CompletedIcon,
   Feedback as FeedbackIcon,
   Download as DownloadIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
+  Visibility as VisibilityIcon
 } from '@mui/icons-material';
 import { Card as AntCard } from 'antd';
 import { Statistic } from 'antd';
@@ -141,7 +142,7 @@ const getStatusLabel = (status) => {
   }
 };
 
-const ApplicationsTable = ({ applications, loading, onFeedbackClick }) => {
+const ApplicationsTable = ({ applications, loading, onFeedbackClick, onViewDetails }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -189,20 +190,19 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick }) => {
               <TableCell align="left">Assigned Officer</TableCell>
               <TableCell align="left">Date</TableCell>
               <TableCell align="left">Remarks</TableCell>
-              <TableCell align="left">Action</TableCell>
-              <TableCell align="left">Download PDF</TableCell>
+              <TableCell align="left">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 3 }}>
                   <CircularProgress size={24} />
                 </TableCell>
               </TableRow>
             ) : displayApplications.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 4 }}>
                   <Typography variant="body1" color="text.secondary">
                     No applications found
                   </Typography>
@@ -242,7 +242,7 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick }) => {
                     <Typography 
                       variant="body2" 
                       sx={{ 
-                        maxWidth: 250, 
+                        maxWidth: 200, 
                         overflow: 'hidden', 
                         textOverflow: 'ellipsis', 
                         whiteSpace: 'nowrap' 
@@ -253,31 +253,38 @@ const ApplicationsTable = ({ applications, loading, onFeedbackClick }) => {
                     </Typography>
                   </TableCell>
                   <TableCell align="left">
-                    {application.requiresFeedback ? (
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                       <Button
-                        startIcon={<FeedbackIcon />}
-                        variant="contained"
+                        startIcon={<VisibilityIcon />}
+                        variant="outlined"
                         color="primary"
                         size="small"
-                        onClick={() => onFeedbackClick(application)}
+                        onClick={() => onViewDetails(application)}
                       >
-                        Submit Feedback
+                        View Details
                       </Button>
-                    ) : (
-                      <Typography variant="body2" color="text.secondary">
-                        No action required
-                      </Typography>
-                    )}
-                  </TableCell>
-                  <TableCell align="left">
-                    <IconButton
-                      size="small"
-                      color="info"
-                      onClick={() => handleDownloadPDF(application.pdfUrl, application.applicationSubject)}
-                      title="Download PDF"
-                    >
-                      <DownloadIcon fontSize="small" />
-                    </IconButton>
+                      
+                      {application.requiresFeedback && (
+                        <Button
+                          startIcon={<FeedbackIcon />}
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => onFeedbackClick(application)}
+                        >
+                          Submit Feedback
+                        </Button>
+                      )}
+                      
+                      <IconButton
+                        size="small"
+                        color="info"
+                        onClick={() => handleDownloadPDF(application.pdfUrl, application.applicationSubject)}
+                        title="Download PDF"
+                      >
+                        <DownloadIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))
@@ -342,6 +349,11 @@ const UserDashboard = () => {
     navigate('/app/feedback', { state: { application } });
   };
 
+  const handleViewDetails = (application) => {
+    // Navigate to application details page with application data
+    navigate('/app/ApplicationDetails', { state: { application } });
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#f5f7fa' }}>
       {/* Header */}
@@ -403,6 +415,7 @@ const UserDashboard = () => {
           applications={applications}
           loading={loading}
           onFeedbackClick={handleFeedbackClick}
+          onViewDetails={handleViewDetails}
         />
       </Box>
     </Box>

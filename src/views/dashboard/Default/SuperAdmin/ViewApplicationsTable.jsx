@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Button, Chip, CircularProgress, IconButton, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TablePagination, Typography } from '@mui/material';
-import { Refresh as RefreshIcon, Edit as EditIcon, Delete as DeleteIcon, Visibility as VisibilityIcon, CloudDownload as DownloadIcon } from '@mui/icons-material';
+import { Refresh as RefreshIcon, Edit as EditIcon, Delete as DeleteIcon, Visibility as VisibilityIcon, CloudDownload as DownloadIcon, Message as MessageIcon } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 const ViewApplicationsTable = ({ 
   displayApplications, 
@@ -18,6 +19,7 @@ const ViewApplicationsTable = ({
   loading, 
   error 
 }) => {
+  const navigate = useNavigate();
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -59,6 +61,33 @@ const ViewApplicationsTable = ({
   const handleDownloadDocument = (docName) => {
     console.log('Download document:', docName);
     // In production, this would trigger file download
+  };
+
+  const handleViewDetails = (application) => {
+    // Navigate to ApplicationDetails page with application data
+    navigate('/app/ApplicationDetails', { 
+      state: { 
+        application: {
+          id: application._id,
+          applicationSubject: application.applicationType,
+          status: application.status.toLowerCase().replace(' ', '_'),
+          officer: application.officerAssigned,
+          date: application.submittedDate,
+          remarks: application.remarks
+        }
+      } 
+    });
+  };
+
+  const handleDownloadPDF = (application) => {
+    console.log('Download PDF for application:', application._id);
+    // In production, this would generate and download a PDF
+    // You can use the pdfGenerator utility here
+  };
+
+  const handleSubmitFeedback = (application) => {
+    console.log('Submit feedback for application:', application._id);
+    // In production, this would open a feedback form
   };
 
   return (
@@ -105,13 +134,15 @@ const ViewApplicationsTable = ({
                 <TableCell align="left">Submitted Date</TableCell>
                 <TableCell align="left">Documents</TableCell>
                 <TableCell align="left">Remarks</TableCell>
+                <TableCell align="left">View Details</TableCell>
+                <TableCell align="left">Download PDF</TableCell>
                 <TableCell align="left">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {displayApplications.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={10} align="center" sx={{ py: 3 }}>
+                  <TableCell colSpan={12} align="center" sx={{ py: 3 }}>
                     <Typography variant="body1" color="text.secondary">
                       {totalRecords === 0 ? 'No applications found' : 'No applications match the current filters'}
                     </Typography>
@@ -185,7 +216,7 @@ const ViewApplicationsTable = ({
                           <IconButton
                             size="small"
                             color="primary"
-                            onClick={() => handleViewDocuments(app.attachedDocuments)}
+                            onClick={() => console.log('View documents:', app.attachedDocuments)}
                             title="View Documents"
                           >
                             <VisibilityIcon fontSize="small" />
@@ -208,24 +239,40 @@ const ViewApplicationsTable = ({
                       </Typography>
                     </TableCell>
                     <TableCell align="left">
-                      <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => handleEdit(app)}
-                          title="Edit Application"
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="error"
-                          onClick={() => handleDeleteApplication(app._id)}
-                          title="Delete Application"
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        startIcon={<VisibilityIcon />}
+                        onClick={() => handleViewDetails(app)}
+                        sx={{ minWidth: 'auto' }}
+                      >
+                        View Details
+                      </Button>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="secondary"
+                        startIcon={<DownloadIcon />}
+                        onClick={() => handleDownloadPDF(app)}
+                        sx={{ minWidth: 'auto' }}
+                      >
+                        Download PDF
+                      </Button>
+                    </TableCell>
+                    <TableCell align="left">
+                      <Button
+                        size="small"
+                        variant="contained"
+                        color="primary"
+                        startIcon={<MessageIcon />}
+                        onClick={() => handleSubmitFeedback(app)}
+                        sx={{ minWidth: 'auto' }}
+                      >
+                        Submit Feedback
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))

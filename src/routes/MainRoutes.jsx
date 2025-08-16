@@ -10,6 +10,8 @@ import ErrorBoundary from './ErrorBoundary';
 // pages (lazy-loaded)
 const DashboardDefault = Loadable(lazy(() => import('views/dashboard/Default')));
 const FeedbackSubmission = Loadable(lazy(() => import('views/dashboard/Default/User/FeedbackeSubmisson')));
+const ApplicationDetails = Loadable(lazy(() => import('views/dashboard/Default/User/ApplicationDetails')));
+const UserDashboard = Loadable(lazy(() => import('views/dashboard/Default/User/user')));
 
 // Super Admin specific components
 const SuperAdminDashboard = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/MainDashboardWrapper')));
@@ -41,7 +43,9 @@ const MainRoutes = {
     { path: 'super-admin/applications', element: <ApplicationManagement /> },
 
     // User routes
-    { path: 'feedback', element: <FeedbackSubmission /> }
+    { path: 'feedback', element: <FeedbackSubmission /> },
+    { path: 'ApplicationDetails', element: <ApplicationDetails /> },
+    { path: 'dashboard', element: <UserDashboard /> }
   ]
 };
 

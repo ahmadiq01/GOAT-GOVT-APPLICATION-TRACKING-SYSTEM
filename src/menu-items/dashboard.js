@@ -139,11 +139,11 @@ const menuItems = [
     roles: ['user']
   },
   {
-    id: 'user-dashboard',
-    title: 'My Dashboard',
+    id: 'application-details',
+    title: 'Application Details',
     type: 'item',
     url: '/app/ApplicationDetails',
-    icon: icons.IconDashboard,
+    icon: icons.IconFileDescription,
     breadcrumbs: false,
     roles: ['user']
   }
