@@ -14,15 +14,15 @@ const ApplicationDetails = Loadable(lazy(() => import('views/dashboard/Default/U
 const UserDashboard = Loadable(lazy(() => import('views/dashboard/Default/User/user')));
 
 // Admin specific components
-const AdminDashboard = Loadable(lazy(() => import('views/dashboard/Default/Admin/AdminDashboardWrapper')));
-const AdminApplications = Loadable(lazy(() => import('views/dashboard/Default/Admin/AdminApplications')));
+// const AdminDashboard = Loadable(lazy(() => import('views/dashboard/Default/Admin/AdminDashboardWrapper')));
+// const AdminApplications = Loadable(lazy(() => import('views/dashboard/Default/Admin/AdminApplications')));
 const ApplicationDetail = Loadable(lazy(() => import('views/dashboard/Default/Admin/ApplicationDetail')));
 const AdminMain = Loadable(lazy(() => import('views/dashboard/Default/Admin/admin')));
 
 // Super Admin specific components
-const SuperAdminDashboard = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/MainDashboardWrapper')));
+// const SuperAdminDashboard = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/MainDashboardWrapper')));
 const UserManagement = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewUserManagement')));
-const NotificationCenter = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewNotificationCenter')));
+// const NotificationCenter = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewNotificationCenter')));
 const ApplicationManagement = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ApplicationManagement')));
 const ViewApplicationsTable = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewApplicationsTable')));
 const ViewApplicationsList = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewApplicationsList')));
