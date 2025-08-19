@@ -14,20 +14,19 @@ const ApplicationDetails = Loadable(lazy(() => import('views/dashboard/Default/U
 const UserDashboard = Loadable(lazy(() => import('views/dashboard/Default/User/user')));
 
 // Admin specific components
-// const AdminDashboard = Loadable(lazy(() => import('views/dashboard/Default/Admin/AdminDashboardWrapper')));
-// const AdminApplications = Loadable(lazy(() => import('views/dashboard/Default/Admin/AdminApplications')));
-const ApplicationDetail = Loadable(lazy(() => import('views/dashboard/Default/Admin/ApplicationDetail')));
 const AdminMain = Loadable(lazy(() => import('views/dashboard/Default/Admin/admin')));
+const ApplicationDetail = Loadable(lazy(() => import('views/dashboard/Default/Admin/ApplicationDetail')));
 
 // Super Admin specific components
-// const SuperAdminDashboard = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/MainDashboardWrapper')));
+const SuperAdminMain = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/superadmin')));
 const UserManagement = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewUserManagement')));
-// const NotificationCenter = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewNotificationCenter')));
 const ApplicationManagement = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ApplicationManagement')));
 const ViewApplicationsTable = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewApplicationsTable')));
 const ViewApplicationsList = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewApplicationsList')));
 const ViewApplicationsFilterSection = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/ViewApplicationsFilterSection')));
-const SuperAdminMain = Loadable(lazy(() => import('views/dashboard/Default/SuperAdmin/superadmin')));
+
+// User specific components  
+const UserMain = Loadable(lazy(() => import('views/dashboard/Default/User/user')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 const MainRoutes = {
@@ -46,31 +45,26 @@ const MainRoutes = {
     { path: 'dashboard', element: <DashboardDefault /> },
 
     // Admin Routes
-    { path: 'admin', element: <AdminDashboard /> },
-    { path: 'admin/dashboard', element: <AdminDashboard /> },
-    { path: 'admin/applications', element: <AdminApplications /> },
-    { path: 'admin/application-detail', element: <ApplicationDetail /> },
+    { path: 'admin', element: <AdminMain /> },
     { path: 'admin/main', element: <AdminMain /> },
+    { path: 'admin/application-detail', element: <ApplicationDetail /> },
 
     // Super Admin Routes
-    { path: 'super-admin', element: <SuperAdminDashboard /> },
-    { path: 'super-admin/dashboard', element: <SuperAdminDashboard /> },
+    { path: 'super-admin', element: <SuperAdminMain /> },
+    { path: 'super-admin/main', element: <SuperAdminMain /> },
     { path: 'super-admin/user-management', element: <UserManagement /> },
-    { path: 'super-admin/notifications', element: <NotificationCenter /> },
     { path: 'super-admin/applications', element: <ApplicationManagement /> },
     { path: 'super-admin/applications-table', element: <ViewApplicationsTable /> },
     { path: 'super-admin/applications-list', element: <ViewApplicationsList /> },
     { path: 'super-admin/applications-filter', element: <ViewApplicationsFilterSection /> },
-    { path: 'super-admin/main', element: <SuperAdminMain /> },
 
     // User routes
-    { path: 'feedback', element: <FeedbackSubmission /> },
-    { path: 'ApplicationDetails', element: <ApplicationDetails /> },
+    { path: 'user', element: <UserMain /> },
     { path: 'user-dashboard', element: <UserDashboard /> },
-    { path: 'feedback-submission', element: <FeedbackSubmission /> }
+    { path: 'feedback', element: <FeedbackSubmission /> },
+    { path: 'feedback-submission', element: <FeedbackSubmission /> },
+    { path: 'ApplicationDetails', element: <ApplicationDetails /> }
   ]
 };
 
 export default MainRoutes;
-
-
