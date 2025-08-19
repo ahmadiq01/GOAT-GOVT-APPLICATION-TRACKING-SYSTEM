@@ -30,7 +30,7 @@ import { Statistic } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
 // API service functions
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://goat-govt-application-tracking-system-backend-production.up.railway.app';
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
