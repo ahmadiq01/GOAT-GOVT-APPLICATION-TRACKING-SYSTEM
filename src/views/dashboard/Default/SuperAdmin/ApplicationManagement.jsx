@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Box, Paper, Typography, Button, Tabs, Tab } from '@mui/material';
 import { Add as AddIcon } from '@mui/icons-material';
 import ApplicationsList from './ViewApplicationsList';
-import NotificationCenter from './ViewNotificationCenter';
+// import NotificationCenter from './ViewNotificationCenter';
 import UserManagement from './ViewUserManagement';
 import axios from 'axios'; // Import axios for API calls
 
